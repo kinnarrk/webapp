@@ -8,6 +8,7 @@ Technology stack:
 - MySQL with Sequelize ORM
 - Ejs (Templating engine - UI)
 - Jest (Testing framework)
+- Circle CI for CI/CD Pipeline
 
 ## Installing node.js and npm
 
@@ -63,3 +64,6 @@ Execute `npm start` from root of the repo
 ## Running test cases
 This app uses [Jest](https://jestjs.io/en/) framework for executing unit and integration tests.
 Command to run all the tests is `npm test`
+
+### Credits
+Theme used: [SB Admin 2](https://startbootstrap.com/themes/sb-admin-2/) Under [MIT](https://github.com/BlackrockDigital/startbootstrap-sb-admin-2/blob/master/LICENSE) license
