@@ -27,7 +27,8 @@ workflows:
       - test
   build_deploy:
     jobs:
-      - build
-        branches:
-          only:
-            - master
+      - build:
+          filters:
+            branches:
+              only:
+                - master
