@@ -2,12 +2,14 @@ var createError = require('http-errors');
 var express = require('express');
 const passport = require('passport');
 var path = require('path');
+// var fs = require('fs');
 // var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const bodyParser = require("body-parser");
 const flash = require('connect-flash');
 const session = require('express-session');
 
+// var env = process.env.NODE_ENV || 'development';
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/user.routes');
@@ -87,3 +89,4 @@ const db = require("./models");
 db.sequelize.sync();
 
 module.exports = app;
+// module.exports = env;
