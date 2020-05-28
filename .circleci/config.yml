@@ -10,7 +10,7 @@ jobs:
       - image: circleci/node:latest
     steps:
       - checkout
-      - run: npm test
+      - run: npm install && npm test
 workflows:
   version: 2
   pr-check:
