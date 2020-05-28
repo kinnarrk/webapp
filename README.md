@@ -2,6 +2,13 @@
 
 This app is meant for pracricing Git workflow and CI/CD
 
+Technology stack:
+- Node.js
+- Express.js
+- MySQL with Sequelize ORM
+- Ejs (Templating engine - UI)
+- Jest (Testing framework)
+
 ## Installing node.js and npm
 
 https://github.com/nodesource/distributions/blob/master/README.md#installation-instructions
@@ -46,6 +53,9 @@ yum install gcc-c++ make
 
 ## Installing dependencies from `package.json`
 Execute `npm install` from root of the repo
+
+## Pre-requisites 
+Before running the app in development environment, it is expected that MySQL server is installed and database mentioned in `DB` field of `db.config.js` is created
 
 ## Starting the app
 Execute `npm start` from root of the repo
