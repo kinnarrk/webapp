@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "test": "jest"
+  },
+  "jest": {
+    "collectCoverage": true
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -25,5 +29,8 @@
     "password-validator": "^5.0.3",
     "sequelize": "^5.21.11",
     "session-file-store": "^1.4.0"
+  },
+  "devDependencies": {
+    "jest": "^26.0.1"
   }
 }

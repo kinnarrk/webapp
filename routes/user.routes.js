@@ -8,6 +8,8 @@ const db = require("../models");
 const User = db.users;
 const Op = db.Sequelize.Op;
 
+var bcryptUtil = require('../lib/utils');
+
 const emailValidator = require("email-validator");
 const passwordValidator = require('password-validator');
 const passwordPattern = new passwordValidator();
@@ -128,10 +130,11 @@ router.post('/register', function(req, res, next) {
                     last_name: req.body.last_name
                 };
 
-                bcrypt.genSalt(10, (err, salt) => {
-                    bcrypt.hash(user1.password, salt, (err, hash) => {
-                        if (err) throw err;
-                        user1.password = hash;
+                // bcrypt.genSalt(10, (err, salt) => {
+                //     bcrypt.hash(user1.password, salt, (err, hash) => {
+                //         if (err) throw err;
+                        user1.password = bcryptUtil.bcryptText(user1.password);
+                        console.info("bcrypt password: " + user1.password)
                         // Save User in the database
                         User.create(user1)
                             .then(data => {
@@ -150,8 +153,8 @@ router.post('/register', function(req, res, next) {
                                 );
                                 console.info('insert error', err);
                             });
-                    });
-                });
+                    // });
+                // });
 
 
             }
