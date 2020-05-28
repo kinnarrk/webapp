@@ -49,3 +49,7 @@ Execute `npm install` from root of the repo
 
 ## Starting the app
 Execute `npm start` from root of the repo
+
+## Running test cases
+This app uses [Jest](https://jestjs.io/en/) framework for executing unit and integration tests.
+Command to run all the tests is `npm test`
