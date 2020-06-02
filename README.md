@@ -1,6 +1,6 @@
 # webapp
 
-This app is meant for practicing Git workflow and CI/CD
+This app is for practicing Git workflow and CI/CD
 
 Technology stack:
 - Node.js
