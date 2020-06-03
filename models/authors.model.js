@@ -8,7 +8,7 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
     Author.associate = function(models) {
-        Author.hasMany(models.BookAuthor, {as: 'bookAuthor'})
+        Author.hasMany(models.BookAuthor, {foreignKey: 'authorId', as: 'authorId'})
     };
     return Author;
 };

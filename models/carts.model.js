@@ -12,5 +12,8 @@ module.exports = (sequelize, Sequelize) => {
     Cart.associate = function(models) {
         Cart.belongsTo(models.User, {foreignKey: 'createdBy', as: 'createdBy'})
     };
+    Cart.associate = function(models) {
+        Cart.hasMany(models.CartBook, {as: 'cartBooks'})
+    };
     return Cart;
 };

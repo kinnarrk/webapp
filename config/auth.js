@@ -1,6 +1,7 @@
 module.exports = {
     ensureAuthenticated: (req, res, next) => {
         console.info("inside ensure" + req.session.returnTo);
+        // console.info("inside ensure user " + req.user.id);
         if (req.isAuthenticated()) {
             delete req.session.returnTo;
             return next();

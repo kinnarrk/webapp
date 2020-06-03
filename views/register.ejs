@@ -99,7 +99,7 @@
 
   <script>
     jQuery.validator.addMethod("namevalidation", function(value, element) {
-      if (/^[a-zA-Z]+'?-?[a-zA-Z]+[^0-9]+/.test(value)) {
+      if (/^[a-zA-Z]+'?-?[a-zA-Z]+\D*$/.test(value)) {
         return true;
       } else {
         return false;

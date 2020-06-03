@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>SB Admin 2 - Blank</title>
+
+  <% include partials/head_includes %>
+
+</head>
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <% include partials/sidebar %>
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <% include partials/topbar %>
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- Page Heading -->
+          <h1 class="h3 mb-4 text-gray-800">Books</h1>
+
+          <!-- Basic Card Example -->
+          <div class="card shadow mb-4">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary"><%= typeof book == 'object' && book.id ? 'Edit' : 'Add' %> Book</h6>
+            </div>
+            <%
+              if(typeof book == 'object' && book.id && book.length > 0) {
+                book = book[0];
+              }
+            %>
+            <div class="card-body">
+              <form class="user" name="addbook" id="addbook" action="<%= typeof book == 'object' && book.id ? '/books/update/'+book.id : '/books/create' %>" method="POST">
+                <div class="text-left">
+                  <% include partials/messages %>
+                </div>
+                <div class="row">
+                  <div class="form-group col-sm-4">
+                    <label for="isbn">ISBN</label>
+                    <input type="text" name="isbn" class="form-control" id="isbn" aria-describedby="isbnHelp" placeholder="Enter ISBN" value="<%= typeof book == 'object' && book ? book.isbn : '' %>" required>
+                  </div>
+                  <div class="form-group col-sm-2"></div>
+                  <div class="form-group col-sm-4">
+                    <label for="title">Title</label>
+                    <input type="text" name="title" class="form-control" id="title" aria-describedby="titleHelp" placeholder="Enter Title" value="<%= typeof book == 'object' && book ? book.title : '' %>" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="form-group col-sm-4">
+                    <label for="authors">Authors</label>
+                    <select class="js-example-basic-multiple col-sm-12" name="authors[]" multiple="multiple">
+                      <% for (let i = 0; i < authors.length; i++)  { %>
+                        <option value="<%= authors[i].id %>"><%= authors[i].name %></option>
+                      <% } %>
+                    </select>
+                  </div>
+                  <div class="form-group col-sm-2"></div>
+                  <div class="form-group col-sm-4">
+                    <label for="publicationDate">Publication Date</label>
+                    <input type="date" name="publicationDate" class="form-control" id="publicationDate" aria-describedby="publicationDateHelp" placeholder="Enter Publication Date" value="<%= typeof book == 'object' && book ? book.publicationDate : '' %>" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="form-group col-sm-4">
+                    <label for="quantity">Quantity</label>
+                    <input type="text" name="quantity" class="form-control" id="quantity" aria-describedby="quantityHelp" placeholder="Enter quantity" value="<%= typeof book == 'object' && book ? book.quantity : '' %>" required>
+                  </div>
+                  <div class="form-group col-sm-2"></div>
+                  <div class="form-group col-sm-4">
+                    <label for="price">Price</label>
+                    <input type="text" name="price" class="form-control" id="price" aria-describedby="priceHelp" placeholder="Enter Price" value="<%= typeof book == 'object' && book ? book.price : '' %>" required>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="form-group col-sm-4">
+                    <button type="submit" class="btn btn-primary"><%= typeof book == 'object' && book.id ? 'Update' : 'Create' %></button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <% include partials/footer %>
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+  </div>
+  <!-- End of Page Wrapper -->
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+  <% include partials/logout_modal %>
+
+  <% include partials/footer_includes %>
+
+  <script>
+    $(document).ready(function() {
+      var select = $('.js-example-basic-multiple').select2({
+        placeholder: 'Choose',
+        allowClear: true
+      });
+
+      select.on('change', function() {
+        $(this).trigger('blur');
+      });
+    });
+
+    <%
+      if(typeof bookAuthors == 'object' && bookAuthors && typeof bookAuthors != 'undefined' && typeof book == 'object' && book.id) {
+        //bookAuthors.forEach((bookAuthor) => { %>
+          $('.js-example-basic-multiple').val(['<%- bookAuthors.map(e => e.authorId).join("\',\'") %>']);
+          $('.js-example-basic-multiple').trigger('change');
+     <% //}); %>
+
+    <% } %>
+
+
+    jQuery.validator.addMethod("isbncheck", function(a) {
+      var b=i=r=0,t=10,l=a.length;
+      if(l==t){
+        for(i;i<9;i++)
+          b+=a[i]*(t-i);
+        r=(b+(a[9]=='X'?t:a[9]))%11==0
+      }
+      if(l==13){
+        for(i;i<12;i++)
+          b+=(i+1)%2?+a[i]:a[i]*3;
+        r=b%t==t-(+a[12]||t)
+      }
+      return r?true:false;
+    }, 'Invalid ISBN number');
+
+    jQuery.validator.addMethod("authorcheck", function(a) {
+      var data = $('.js-example-basic-multiple').select2('data');
+      if(typeof data == 'object' && data && data.length > 0 )
+        return true;
+      else
+        return false;
+    }, 'Select at lease one author');
+
+    $("#addbook").validate({
+      ignore: null,
+      rules: {
+        isbn: {
+          required: true,
+          isbncheck: true
+        },
+        title: {
+          required: true,
+          minlength: 1,
+          maxlength: 100
+        },
+        authors: {
+          required: true,
+          authorcheck: true
+        },
+        publicationDate: {
+          required: true,
+          date: true
+        },
+        quantity: {
+          required: true,
+          digits: true,
+          min: 0,
+          max: 999
+        },
+        price: {
+          required: true,
+          // number: true,
+          min: 0.01,
+          max: 9999.99,
+          currency: ["$", false]
+        }
+
+      },
+      messages: {
+        email: {
+          required: "Enter your email address to login",
+          email: "Your email address must be in the format of name@domain.com"
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
