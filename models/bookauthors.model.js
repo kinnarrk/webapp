@@ -18,10 +18,8 @@ module.exports = (sequelize, Sequelize) => {
         }
     });
     BookAuthor.associate = function(models) {
-        BookAuthor.belongsTo(models.Book, {foreignKey: 'bookId', as: 'bookId'})
-    };
-    BookAuthor.associate = function(models) {
-        BookAuthor.belongsTo(models.Author, {foreignKey: 'authorId', as: 'authorId'})
+        BookAuthor.belongsTo(models.Book, {foreignKey: 'bookId', as: 'bookId'});
+        BookAuthor.belongsTo(models.Author, {foreignKey: 'authorId', as: 'authorId'});
     };
     return BookAuthor;
 };

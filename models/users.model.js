@@ -13,6 +13,11 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING
         }
     });
-
+    // User.hasMany(Book);
+    User.associate = function(models) {
+        User.hasMany(models.Book, {
+            foreignKey: 'createdBy',
+            as: 'createdBy'});
+    };
     return User;
 };
