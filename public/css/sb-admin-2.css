@@ -10686,11 +10686,11 @@ form.user .btn-user {
 }
 
 .error {
-  color: #5a5c69;
-  font-size: 7rem;
+  color: #ff0000;
+  font-size: 0.8rem;
   position: relative;
   line-height: 1;
-  width: 12.5rem;
+  /*width: 12.5rem;*/
 }
 
 @-webkit-keyframes noise-anim {

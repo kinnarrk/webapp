@@ -39,15 +39,13 @@
                   <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                   </div>
-                  <div class="text-left">
-                    <% include partials/messages %>
-                  </div>
-                  <form class="user" name="login" action="/users/login" method="POST">
+                  <form class="user" name="login" id="loginform" action="/users/login" method="POST">
                     <div class="text-left">
                       <% include partials/messages %>
                     </div>
                     <div class="form-group">
                       <input type="email" name="email" class="form-control form-control-user" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter Email Address..." required>
+                      <small id="emailHelp" class="form-text text-muted error"></small>
                     </div>
                     <div class="form-group">
                       <input type="password" name="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password" required>
@@ -99,6 +97,25 @@
   <!-- Custom scripts for all pages-->
   <script src="/js/sb-admin-2.min.js"></script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/additional-methods.min.js"></script>
+
+  <script>
+    $("#loginform").validate({
+      rules: {
+        email: {
+          required: true,
+          email: true
+        }
+      },
+      messages: {
+        email: {
+          required: "Enter your email address to login",
+          email: "Your email address must be in the format of name@domain.com"
+        }
+      }
+    });
+  </script>
 </body>
 
 </html>

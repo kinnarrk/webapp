@@ -34,7 +34,7 @@
               <div class="text-center">
                 <h1 class="h4 text-gray-900 mb-4">Create an Account!</h1>
               </div>
-              <form class="user" name="register" action="/users/register" method="POST">
+              <form class="user" name="register" id="registrationform" action="/users/register" method="POST">
                 <div class="text-left">
                   <% include partials/messages %>
                 </div>
@@ -51,10 +51,10 @@
                 </div>
                 <div class="form-group row">
                   <div class="col-sm-6 mb-3 mb-sm-0">
-                    <input type="password" name="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="Password" required>
+                    <input type="password" name="password" id="password" class="form-control form-control-user" placeholder="Password" required>
                   </div>
                   <div class="col-sm-6">
-                    <input type="password" class="form-control form-control-user" id="exampleRepeatPassword" placeholder="Repeat Password" required>
+                    <input type="password" name="password_again" class="form-control form-control-user" id="repeatPassword" placeholder="Repeat Password" required>
                   </div>
                 </div>
                 <input type="submit" class="btn btn-primary btn-user btn-block" value="Register Account">
@@ -94,6 +94,59 @@
   <!-- Custom scripts for all pages-->
   <script src="../js/sb-admin-2.min.js"></script>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/jquery.validate.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.2/additional-methods.min.js"></script>
+
+  <script>
+    jQuery.validator.addMethod("namevalidation", function(value, element) {
+      if (/^[a-zA-Z]+'?-?[a-zA-Z]+[^0-9]+/.test(value)) {
+        return true;
+      } else {
+        return false;
+      };
+    }, 'Please enter proper name.');
+
+    jQuery.validator.addMethod("pwcheck", function(value) {
+      return /^[A-Za-z0-9\d=!\-@#$%^&._*]*$/.test(value) // consists of only these
+              && /[A-Z]/.test(value) // has a lowercase letter
+              && /[a-z]/.test(value) // has a lowercase letter
+              && /\d/.test(value) // has a digit
+              && /[=!\-@#$%^&._*]/.test(value) // has a special character
+    }, 'Password must contain minimum 8 characters with at least 1 uppercase, 1 lowercase, 1 digit and 1 symbol');
+
+    $("#registrationform").validate({
+      rules: {
+        email: {
+          required: true,
+          email: true
+        },
+        first_name: {
+          required: true,
+          namevalidation: true
+        },
+        last_name: {
+          required: true,
+          namevalidation: true
+        },
+        password: {
+          required: true,
+          pwcheck: true,
+          minlength: 8,
+          maxlength: 30
+        },
+        password_again: {
+          equalTo: "#password"
+        }
+
+      },
+      messages: {
+        email: {
+          required: "Enter your email address to login",
+          email: "Your email address must be in the format of name@domain.com"
+        }
+      }
+    });
+  </script>
 </body>
 
 </html>
