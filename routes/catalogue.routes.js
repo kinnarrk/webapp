@@ -22,7 +22,7 @@ router.get('/', ensureAuthenticated, (req, res) => {
                                     " concat(u.first_name, ' ', u.last_name) as sellerName, b.createdBy as createdBy " +
                                     " FROM books b join bookAuthors ba on b.id = ba.bookId " +
                                     " join authors a on a.id = ba.authorId join users u on u.id = b.createdBy " +
-                                    " where b.isDeleted = 0 GROUP BY id ORDER BY b.price ASC, b.quantity DESC", { type: QueryTypes.SELECT })
+                                    " where b.isDeleted = 0 and b.quantity > 0 GROUP BY id ORDER BY b.price ASC, b.quantity DESC", { type: QueryTypes.SELECT })
         .then(function(books){
             res.render('catalogue', {books: books});
             req.session.flash = [];
