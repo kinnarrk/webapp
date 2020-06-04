@@ -14,6 +14,8 @@ const session = require('express-session');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/user.routes');
 var booksRouter = require('./routes/book.routes');
+var catalogueRouter = require('./routes/catalogue.routes');
+var cartRouter = require('./routes/cart.routes');
 
 var app = express();
 
@@ -70,6 +72,8 @@ app.use('/', indexRouter);
 // app.use('/users', usersRouter);
 app.use('/users', usersRouter);
 app.use('/books', booksRouter);
+app.use('/catalogue', catalogueRouter);
+app.use('/cart', cartRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
