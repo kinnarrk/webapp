@@ -21,14 +21,14 @@ module.exports = (sequelize, Sequelize) => {
         price: {
             type: Sequelize.DECIMAL(10,2)
         },
-        // createdBy: {
-        //     type: Sequelize.INTEGER,
-        //     allowNull: false,
-        //     references: {         // User belongsTo User 1:1
-        //         model: 'users',
-        //         key: 'id'
-        //     }
-        // },
+        createdBy: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+            references: {         // User belongsTo User 1:1
+                model: 'users',
+                key: 'id'
+            }
+        },
         updatedBy: {
             type: Sequelize.INTEGER,
             allowNull: true,
