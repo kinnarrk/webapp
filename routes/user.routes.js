@@ -177,26 +177,10 @@ router.post('/profile', ensureAuthenticated, (req, res) => {
     } = req.body;
     errors = [];
     // Validate request
-    if (!req.body.email || !req.body.password || !req.body.first_name || !req.body.last_name) {
+    if (!req.body.email || !req.body.first_name || !req.body.last_name) {
         errors.push({
             msg: 'Fields can not be empty!'
         });
-    }
-
-    passwordPattern.is().min(8)
-        .is().max(100)
-        .has().uppercase()
-        .has().lowercase()
-        .has().digits()
-        .has().symbols()
-        .has().not().spaces();
-    const validPassword = passwordPattern.validate(req.body.password);
-
-    if (!validPassword) {
-        errors.push({
-            msg: 'Password must contain minimum 8 characters with at least 1 uppercase, 1 lowercase, 1 digit and 1 symbol'
-        });
-        // console.info('error in validPassword');
     }
 
     if (errors.length > 0) {
@@ -212,49 +196,150 @@ router.post('/profile', ensureAuthenticated, (req, res) => {
         // Update a User
         // console.info('updating user');
         const user1 = {
-            password: req.body.password,
             first_name: req.body.first_name,
             last_name: req.body.last_name
         };
 
-        bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(user1.password, salt, (err, hash) => {
-                if (err) throw err;
-                user1.password = hash;
-                // Save User in the database
-
-                User.update(user1, {
-                    where: {email: req.body.email}
-                })
-                    .then(num => {
-                        if (num == 1) {
-                            req.flash(
-                                'success_msg',
-                                'Profile was updated successfully.'
-                            );
-                            errors = [];
-                            res.redirect('/users/profile');
-                            // res.render('profile');
-                            // req.session.flash = [];
-                        } else {
-                            req.flash(
-                                'error_msg',
-                                'Error updating profile'
-                            );
-                        }
-                    })
-                    .catch(err => {
-                        req.flash(
-                            'error_msg',
-                            'Error updating profile'
-                        );
-                    });
-            });
+        User.update(user1, {
+            where: {email: req.body.email}
+        })
+        .then(num => {
+            if (num == 1) {
+                req.flash(
+                    'success_msg',
+                    'Profile was updated successfully.'
+                );
+                errors = [];
+                res.redirect('/users/profile');
+                // res.render('profile');
+                // req.session.flash = [];
+            } else {
+                req.flash(
+                    'error_msg',
+                    'Error updating profile'
+                );
+            }
+        })
+        .catch(err => {
+            req.flash(
+                'error_msg',
+                'Error updating profile'
+            );
         });
+    }
+});
+
+router.get('/changePassword', ensureAuthenticated, (req, res) => {
+    errors = [];
+    res.render('changePassword');
+    req.session.flash = [];
+});
+
+router.post('/changePassword', ensureAuthenticated, (req, res) => {
+    const {
+        password
+    } = req.body;
+    errors = [];
+    // Validate request
+    if (!req.body.oldPassword || !req.body.newPassword || !req.body.confirmPassword) {
+        errors.push({
+            msg: 'Fields can not be empty!'
+        });
+    }
+
+    if (req.body.oldPassword == req.body.newPassword) {
+        errors.push({
+            msg: 'Old and new passwords can not be same!'
+        });
+    }
+
+    passwordPattern.is().min(8)
+        .is().max(100)
+        .has().uppercase()
+        .has().lowercase()
+        .has().digits()
+        .has().symbols()
+        .has().not().spaces();
+    const validPassword = passwordPattern.validate(req.body.newPassword);
+
+    if (!validPassword) {
+        errors.push({
+            msg: 'Password must contain minimum 8 characters with at least 1 uppercase, 1 lowercase, 1 digit and 1 symbol'
+        });
+        // console.info('error in validPassword');
     }
 
 
 
+
+    if (errors.length > 0) {
+        // console.info('errors.length', errors.length);
+        res.render('changePassword', {
+            errors
+        });
+        req.session.flash = [];
+    } else {
+        // Update a User
+        // console.info('updating user');
+        const user1 = {
+            password: req.body.newPassword,
+        };
+        const user = User.findByPk(req.user.id).then(user => {
+            if(user){
+                bcrypt.compare(req.body.oldPassword, user.password, (err, isMatch) => {
+                    if (err) throw err;
+                    if (isMatch) {
+                        bcrypt.genSalt(10, (err, salt) => {
+                            bcrypt.hash(user1.password, salt, (err, hash) => {
+                                if (err) throw err;
+                                user1.password = hash;
+                                // Save User in the database
+
+                                User.update(user1, {
+                                    where: {id: req.user.id}
+                                }).then(num => {
+                                    if (num == 1) {
+                                        req.flash(
+                                            'success_msg',
+                                            'Password changed successfully.'
+                                        );
+                                        errors = [];
+                                        res.redirect('/users/changePassword');
+                                        // res.render('profile');
+                                        // req.session.flash = [];
+                                    } else {
+                                        req.flash(
+                                            'error_msg',
+                                            'Error changing password'
+                                        );
+                                        res.redirect('/users/changePassword');
+                                    }
+                                }).catch(err => {
+                                    req.flash(
+                                        'error_msg',
+                                        'Error changing password'
+                                    );
+                                    res.redirect('/users/changePassword');
+                                });
+                            });
+                        });
+                    } else {
+                        req.flash(
+                            'error_msg',
+                            'Old password incorrect!'
+                        );
+                        res.redirect('/users/changePassword');
+                    }
+                });
+            } else {
+                req.flash(
+                    'error_msg',
+                    'Invalid user request!'
+                );
+                res.redirect('/users/changePassword');
+            }
+        });
+    }
 });
 
 // router.post("/", users.create);

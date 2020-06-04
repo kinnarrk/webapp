@@ -168,7 +168,7 @@ router.post('/add/:id', ensureAuthenticated, (req, res, next) => {
         } else {
             req.flash(
                 'error_msg',
-                'Please check quantity'
+                'The either does not exist or not enough quantity'
             );
             // console.info('invalid book', err);
             res.redirect('/catalogue');
@@ -192,6 +192,7 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
         .then(cartBook => {
             if(cartBook){   // book already exists in cart. Update qty
                 const cbq = cartBook.quantity;
+                const cbb = cartBook.bookId;
                 console.info("cbq:" + + cbq);
                 cartBook.destroy({
 
@@ -206,7 +207,7 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
                         //     });
                         // book.update({quantity: book.quantity + cbq})
                         //     .then(data => {});
-                        db.sequelize.query("update books set quantity = (quantity + "+cbq+") where id = " + req.params.id, { type: QueryTypes.UPDATE })
+                        db.sequelize.query("update books set quantity = (quantity + "+cbq+") where id = " + cbb, { type: QueryTypes.UPDATE })
                         req.flash(
                             'success_msg',
                             ' Removed from cart!'
