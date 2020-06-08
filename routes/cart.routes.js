@@ -24,7 +24,7 @@ router.get('/view', ensureAuthenticated, (req, res) => {
         " FROM books b JOIN bookAuthors ba ON b.id = ba.bookId "+
         " JOIN authors a ON a.id = ba.authorId JOIN users u ON u.id = b.createdBy "+
         " JOIN cartBooks cb ON cb.bookId = b.id JOIN carts c ON c.id = cb.cartId "+
-        " WHERE b.isDeleted = 0 AND b.quantity > 0 AND c.createdBy = 9 GROUP BY b.id ORDER BY b.price ASC", { type: QueryTypes.SELECT })
+        " WHERE b.isDeleted = 0 AND cb.quantity > 0 AND c.createdBy = "+req.user.id+" GROUP BY b.id ORDER BY b.price ASC", { type: QueryTypes.SELECT })
         .then(function(books){
             res.render('cart', {books: books});
             req.session.flash = [];
@@ -36,7 +36,7 @@ router.post('/add/:id', ensureAuthenticated, (req, res, next) => {
     Book.findOne({ where: {
             id: req.params.id,
             createdBy: {[Op.not]: req.user.id},
-            quantity: {[Op.gt]: parseInt(req.body.quantity)},
+            quantity: {[Op.gte]: parseInt(req.body.quantity)},
             isDeleted: false}
     })
     .then(book => {
