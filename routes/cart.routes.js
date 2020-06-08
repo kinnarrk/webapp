@@ -168,7 +168,7 @@ router.post('/add/:id', ensureAuthenticated, (req, res, next) => {
         } else {
             req.flash(
                 'error_msg',
-                'The either does not exist or not enough quantity'
+                'Either book does not exist or not enough quantity'
             );
             // console.info('invalid book', err);
             res.redirect('/catalogue');
