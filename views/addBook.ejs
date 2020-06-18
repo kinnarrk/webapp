@@ -266,7 +266,7 @@
           currency: ["$", false]
         },
         "bookImages[]": {
-          required: true,          
+          <%= typeof book == 'object' && book.id ? 'required: false,' : 'required: true,' %>
           extension: "jpg|jpeg|png|gif",
           filesize: 20971520
           // filecheck: true

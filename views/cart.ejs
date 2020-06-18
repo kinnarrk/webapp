@@ -66,6 +66,7 @@
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Seller</th>
+                    <th>Image</th>
                     <th>Action</th>
                   </tr>
                   </thead>
@@ -91,6 +92,7 @@
                         <td><%= book.quantity %></td>
                         <td><%= book.price %></td>
                         <td><%= book.sellerName %></td>
+                        <td id="bi_<%= book.id %>"><img height="100" src="<%= book.imagePath %>"></td>
                         <td>
 
 <!--                            <form class="user" name="addcart" id="addcart" action="/cart/update/<%= book.id %>" method="POST">-->

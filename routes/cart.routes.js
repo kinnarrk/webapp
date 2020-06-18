@@ -20,10 +20,11 @@ const {
 router.get('/view', ensureAuthenticated, (req, res) => {
     errors = [];
     db.sequelize.query("SELECT ANY_VALUE(b.id) id, ANY_VALUE(b.isbn) isbn, ANY_VALUE(b.title) title, DATE_FORMAT(ANY_VALUE(b.publicationDate), '%m/%d/%Y') publicationDate, ANY_VALUE(cb.quantity) quantity, ANY_VALUE(b.quantity) quantity1, " +
-        " ANY_VALUE(b.price) price, GROUP_CONCAT(a.name) AS author, ANY_VALUE(b.createdBy) AS createdBy, ANY_VALUE(cb.id) as cartBookId "+
+        " ANY_VALUE(b.price) price, GROUP_CONCAT(a.name) AS author, ANY_VALUE(b.createdBy) AS createdBy, ANY_VALUE(cb.id) as cartBookId, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, ANY_VALUE(bi.imagePath) as imagePath "+
         " FROM books b JOIN bookAuthors ba ON b.id = ba.bookId "+
         " JOIN authors a ON a.id = ba.authorId JOIN users u ON u.id = b.createdBy "+
         " JOIN cartBooks cb ON cb.bookId = b.id JOIN carts c ON c.id = cb.cartId "+
+        " left join bookImages bi on b.id = bi.bookId " +
         " WHERE b.isDeleted = 0 AND cb.quantity > 0 AND c.createdBy = "+req.user.id+" GROUP BY id ORDER BY ANY_VALUE(b.price) ASC", { type: QueryTypes.SELECT })
         .then(function(books){
             res.render('cart', {books: books});

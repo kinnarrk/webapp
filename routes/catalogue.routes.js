@@ -19,9 +19,10 @@ router.get('/', ensureAuthenticated, (req, res) => {
     errors = [];
     db.sequelize.query("SELECT b.id id, b.isbn isbn, b.title title, date_format(b.publicationDate, '%m/%d/%Y') publicationDate, b.quantity quantity, " +
                                     " b.price price, group_concat(a.name) as author, " +
-                                    " concat(u.first_name, ' ', u.last_name) as sellerName, b.createdBy as createdBy " +
+                                    " concat(u.first_name, ' ', u.last_name) as sellerName, b.createdBy as createdBy, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, ANY_VALUE(bi.imagePath) as imagePath " +
                                     " FROM books b join bookAuthors ba on b.id = ba.bookId " +
                                     " join authors a on a.id = ba.authorId join users u on u.id = b.createdBy " +
+                                    " left join bookImages bi on b.id = bi.bookId " +
                                     " where b.isDeleted = 0 and b.quantity > 0 GROUP BY id ORDER BY b.price ASC, b.quantity DESC", { type: QueryTypes.SELECT })
         .then(function(books){
             res.render('catalogue', {books: books});

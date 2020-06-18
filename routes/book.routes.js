@@ -145,6 +145,21 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
                         console.info("in add 22....");
                         if(authors) {
                             // console.info("in add 33...." + book);
+                            BookImage.findAll( { where: { bookId: book.id }
+                            }).then(bookImages => {
+                                // console.info("in add 2....");
+                                if(bookImages) {
+                                    // console.info("in add 3....");
+                                    res.render('addBook', {book: book, bookAuthors: bookAuthors, authors: authors, bookImages: bookImages});                                    
+                                } else {
+                                    req.flash(
+                                        'error_msg',
+                                        'Book not found'
+                                    );
+                                    errors = [];
+                                    res.redirect('/books');
+                                }
+                            });
                             res.render('addBook', {book: book, bookAuthors: bookAuthors, authors: authors});
                         } else {
                             req.flash(
@@ -339,7 +354,7 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
     }
 });
 
-router.post('/update/:id', ensureAuthenticated, function(req, res, next) {
+router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages[]', 10), function(req, res, next) {
     const {
         isbn,
         title,
@@ -421,6 +436,28 @@ router.post('/update/:id', ensureAuthenticated, function(req, res, next) {
                                 });
                         }
                 });
+                
+                for (var i = 0; i < req.files.length; i++) {
+                    // s3path = s3utils.putObject(req.files[i].path);
+                    console.info("S3 path: " + req.files[i]);
+                    const bookimages = {
+                        bookId: data.id,
+                        imagePath: req.files[i].location,    // full path to the uploaded file
+                        imageBucket: req.files[i].bucket,
+                        imageName: req.files[i].key,
+                        imageType: req.files[i].contentType
+                    }
+                    // destination: dir and filename: file name at saved location
+                    BookImage.create(bookimages)
+                        .then(data2 => {
+                            if(!data2){
+                                errors.push({
+                                    msg: 'Error in adding book image'
+                                });
+                            }
+                        });
+                }
+            
                 // console.info("data:" + data)
                 if(data) {
                     req.flash(
