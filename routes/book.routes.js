@@ -20,6 +20,7 @@ const upload1 = require("../lib/upload");
 var multer  = require('multer')
 
 var s3utils = require('../lib/s3Utils');
+var s3 = s3utils.s3
 
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -42,9 +43,10 @@ const {
 router.get('/', ensureAuthenticated, (req, res) => {
     errors = [];
     db.sequelize.query("SELECT b.id id, b.isbn isbn, b.title title, date_format(b.publicationDate, '%m/%d/%Y') publicationDate, b.quantity quantity, " +
-                                    " b.price price, group_concat(a.name) as author " +
+                                    " b.price price, group_concat(a.name) as author, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, ANY_VALUE(bi.imagePath) as imagePath " +
                                     " FROM books b join bookAuthors ba on b.id = ba.bookId " +
                                     " join authors a on a.id = ba.authorId join users u on u.id = b.createdBy " +
+                                    " left join bookImages bi on b.id = bi.bookId " +
                                     " where b.isDeleted = 0 and b.createdBy = " + req.user.id + " GROUP BY id ORDER BY b.price ASC", { type: QueryTypes.SELECT })
         .then(function(books){
             res.render('book', {books: books});
@@ -486,6 +488,67 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
             'Invalid book selected!'
         );
         res.redirect('/books');
+    });
+});
+
+router.get('/image/:imageFile', ensureAuthenticated, (req, res, next) => {
+    // AWS.config.update({
+    //     accessKeyId: "Your Key Goes Here",
+    //     secretAccessKey: "Your Secret Key Goes Here"
+    //   });let s3 = new AWS.S3();
+
+    BookImage.findOne({ where: { imageName: req.params.imageFile}
+    })
+    .then(bookImage => {
+
+        // async function getImage() {
+        //     const data = s3utils.s3.getObject(
+        //         {
+        //             Bucket: s3utils.aws_s3_bucket,
+        //             Key: bookImage.imageName
+        //         }
+
+        //     ).promise();
+        //     return data;
+        // }
+        if(bookImage){
+            var data = s3utils.getS3Object(bookImage);
+            console.info("fileData: " + data);
+            if(data){
+                // res.writeHead(200, {'Content-Type': 'image/jpeg'});
+                res.write(data.Body, 'binary');
+                res.write(data);
+                res.end(null, 'binary');
+            } else {
+                res.writeHead(200, {'Content-Type': 'text'});
+                res.write('Image not found');
+                res.end(null, 'text');
+            }
+        }
+
+        // s3.getObject({
+        //         Bucket: s3utils.aws_s3_bucket,
+        //         Key: bookImage.imageName
+        //     }, function(err, data) {
+        //         res.writeHead(200, {'Content-Type': bookImage.imageType});
+        //         res.write(data.Body, 'binary');
+        //         res.end(null, 'binary');
+        // });
+
+        // getImage()
+        //     .then((img) => {
+        //         let image = "<img src='data:"+bookImage.imageType+";base64," + encode(img.Body) + "'" + "/>";                
+        //         res.send(image)
+        //     }).catch((e) => {
+        //         res.send("No image")
+        //         log.error(e);
+        //     });
+
+        // function encode(data) {
+        //     let buf = Buffer.from(data);
+        //     let base64 = buf.toString('base64');
+        //     return base64
+        // }
     });
 });
 
