@@ -14,10 +14,10 @@ module.exports = {
         }
     },
     "test": {
-        HOST: "localhost",
-        USER: "root",
-        PASSWORD: "root",
-        DB: "bookstore",
+        HOST: process.env.DBHost || "localhost",
+        USER: process.env.DBUser || "root",
+        PASSWORD: process.env.DBPassword || "root",
+        DB: process.env.DBName || "bookstore",
         dialect: "mysql",
         pool: {
             max: 5,
@@ -27,10 +27,10 @@ module.exports = {
         }
     },
     "production": {
-        HOST: "localhost",
-        USER: "root",
-        PASSWORD: "root",
-        DB: "bookstore",
+        HOST: process.env.DBHost || "localhost",
+        USER: process.env.DBUser || "root",
+        PASSWORD: process.env.DBPassword || "root",
+        DB: process.env.DBName || "bookstore",
         dialect: "mysql",
         pool: {
             max: 5,

@@ -8,9 +8,31 @@ const db = require("../models");
 const Book = db.books;
 const Author = db.authors;
 const BookAuthor = db.bookAuthors;
+const BookImage = db.bookImages;
 const User = db.users;
 const Op = db.Sequelize.Op;
 const { QueryTypes } = require('sequelize');
+
+const fs = require('fs');
+const AWS = require('aws-sdk');
+
+const upload1 = require("../lib/upload");
+var multer  = require('multer')
+
+var s3utils = require('../lib/s3Utils');
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, '/tmp/uploads')
+    },
+    filename: function (req, file, cb) {
+        const extension = file.originalname.split('.').pop();
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        cb(null, uniqueSuffix+"."+extension)
+    }
+})
+var upload = multer({ storage: storage })
+// var upload = multer({ dest: '/tmp/uploads' })
 
 const {
     ensureAuthenticated
@@ -159,19 +181,23 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
     });
 });
 
-router.post('/create', ensureAuthenticated, function(req, res, next) {
-    const {
-        isbn,
-        title,
-        publicationDate,
-        quantity,
-        price,
-        authors
-    } = req.body;
+router.post('/create', ensureAuthenticated, upload.array('bookImages[]', 10), function(req, res, next) {
+    // upload.array('bookImages', 10), 
+    // const {
+    //     isbn,
+    //     title,
+    //     publicationDate,
+    //     quantity,
+    //     price,
+    //     authors
+    // } = req.body;
     errors = [];
     // Validate request
-    console.info("authors:" + req.body['authors[]'])
-    if (!req.body.isbn || !req.body.title || !req.body.publicationDate || !req.body.quantity || !req.body.price || !req.body['authors[]']) {
+    console.info("authors:" + req.body.authors);
+    // console.info("files:" + req.files.bookImages);
+    // console.info("authors:" + req.body['authors[]'])
+    // console.info("files:" + req.files.length);
+    if (!req.body.isbn || !req.body.title || !req.body.publicationDate || !req.body.quantity || !req.body.price || !req.body.authors) {
         errors.push({
             msg: 'Fields can not be empty!'
         });
@@ -185,7 +211,8 @@ router.post('/create', ensureAuthenticated, function(req, res, next) {
         price: req.body.price,
         createdBy: req.user.id
     };
-    const bookAuthors = req.body['authors[]'];
+    const bookAuthors = req.body.authors;
+    // const bookImages = req.files['bookImage[]'];
 
     if (errors.length > 0) {
         // console.info('errors.length', errors.length);
@@ -224,6 +251,58 @@ router.post('/create', ensureAuthenticated, function(req, res, next) {
                             }
                         });
                 }
+                // console.info("files:" + req.files['bookImages[]']);
+
+                for (var i = 0; i < req.files.length; i++) {
+                    s3path = s3utils.putObject(req.files[i].path);
+                    const bookimages = {
+                        bookId: data.id,
+                        imagePath: s3path // req.files[i].path    // full path to the uploaded file
+                    }
+                    // destination: dir and filename: file name at saved location
+                    BookImage.create(bookimages)
+                        .then(data2 => {
+                            if(!data2){
+                                errors.push({
+                                    msg: 'Error in adding book image'
+                                });
+                            }
+                        });
+                }
+                try {
+
+                    // upload1(req, res);
+                    // console.log("req.file:" + req.file);
+                    // console.log("req.files:" + req.files);
+                    // console.log("req.files.bookImages:" + req.files.bookImages);
+                    // console.log("req.body.bookImages:" + req.body.bookImages);
+                
+                    if (req.files.length <= 0) {
+                    //   return res.send(`You must select at least 1 file.`);
+                    }
+                
+                    // return res.send(`Files has been uploaded.`);
+                } catch (error) {
+                    console.log(error);
+                
+                    if (error.code === "LIMIT_UNEXPECTED_FILE") {
+                        // return res.send("Too many files to upload.");
+                    }
+                    // return res.send(`Error when trying upload many files: ${error}`);
+                }
+                // now file upload
+                // for (var i = 0; i < bookImages.length; i++) {
+                    // fs.readFile(req.files.bookImage.path, function (err, data) {
+                    //     // ...
+                    //     var newPath = __dirname + "/uploads/"+book.id+"_"+ new Date();
+                    //     fs.writeFile(newPath, data, function (err) {
+                    //         if(err){
+                    //             console.error("File upload error:" + err)
+                    //         }
+                    //     });
+                    // });
+                // }
+
                 console.info("data:" + data)
                 if(data) {
                     req.flash(

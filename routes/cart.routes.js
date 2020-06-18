@@ -77,8 +77,9 @@ router.post('/add/:id', ensureAuthenticated, (req, res, next) => {
                                 .then(cartb => {
                                     if(cartb){
                                         //success
-                                        book.update({quantity: book.quantity - parseInt(req.body.quantity)})
-                                            .then(data => {});
+                                        // Don't update the book quantity just by adding to cart
+                                        // book.update({quantity: book.quantity - parseInt(req.body.quantity)})
+                                        //     .then(data => {});
                                         req.flash(
                                             'success_msg',
                                             book.title + ' added to cart!'
@@ -193,7 +194,7 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
             if(cartBook){   // book already exists in cart. Update qty
                 const cbq = cartBook.quantity;
                 const cbb = cartBook.bookId;
-                console.info("cbq:" + + cbq);
+                // console.info("cbq:" + + cbq);
                 cartBook.destroy({
 
                 }).then(data => {
@@ -207,7 +208,8 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
                         //     });
                         // book.update({quantity: book.quantity + cbq})
                         //     .then(data => {});
-                        db.sequelize.query("update books set quantity = (quantity + "+cbq+") where id = " + cbb, { type: QueryTypes.UPDATE })
+                        // Again not to change the quantity since it's not a checkout
+                        // db.sequelize.query("update books set quantity = (quantity + "+cbq+") where id = " + cbb, { type: QueryTypes.UPDATE })
                         req.flash(
                             'success_msg',
                             ' Removed from cart!'

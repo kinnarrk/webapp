@@ -29,5 +29,6 @@ db.authors = require("./authors.model.js")(sequelize, Sequelize);
 db.bookAuthors = require("./bookauthors.model.js")(sequelize, Sequelize);
 db.carts = require("./carts.model.js")(sequelize, Sequelize);
 db.cartBooks = require("./cartbooks.model.js")(sequelize, Sequelize);
+db.bookImages = require("./bookimages.model.js")(sequelize, Sequelize);
 
 module.exports = db;

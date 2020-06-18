@@ -8,11 +8,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description" content="">
   <meta name="author" content="">
+  <meta name="csrf-token" content="XYZ123">
 
   <title>SB Admin 2 - Blank</title>
 
   <% include partials/head_includes %>
 
+  <style>
+    #actions {
+      margin: 2em 0;
+    }
+
+
+    /* Mimic table appearance */
+    div.table {
+      display: table;
+    }
+    div.table .file-row {
+      display: table-row;
+    }
+    div.table .file-row > div {
+      display: table-cell;
+      vertical-align: top;
+      border-top: 1px solid #ddd;
+      padding: 8px;
+    }
+    div.table .file-row:nth-child(odd) {
+      background: #f9f9f9;
+    }
+
+
+
+    /* The total progress gets shown by event listeners */
+    #total-progress {
+      opacity: 0;
+      transition: opacity 0.3s linear;
+    }
+
+    /* Hide the progress bar when finished */
+    #previews .file-row.dz-success .progress {
+      opacity: 0;
+      transition: opacity 0.3s linear;
+    }
+
+    /* Hide the delete button initially */
+    #previews .file-row .delete {
+      display: none;
+    }
+
+    /* Hide the start and cancel buttons and show the delete button */
+
+    #previews .file-row.dz-success .start,
+    #previews .file-row.dz-success .cancel {
+      display: none;
+    }
+    #previews .file-row.dz-success .delete {
+      display: block;
+    }
+  </style>
 </head>
 <body id="page-top">
 
@@ -46,7 +99,7 @@
               }
             %>
             <div class="card-body">
-              <form class="user" name="addbook" id="addbook" action="<%= typeof book == 'object' && book.id ? '/books/update/'+book.id : '/books/create' %>" method="POST">
+              <form class="user" name="addbook" id="addbook" enctype="multipart/form-data" action="<%= typeof book == 'object' && book.id ? '/books/update/'+book.id : '/books/create' %>" method="POST">
                 <div class="text-left">
                   <% include partials/messages %>
                 </div>
@@ -91,6 +144,11 @@
                 <div class="row">
                   <div class="form-group col-sm-4">
                     <button type="submit" class="btn btn-primary"><%= typeof book == 'object' && book.id ? 'Update' : 'Create' %></button>
+                  </div>
+                  <div class="form-group col-sm-2"></div>
+                  <div class="form-group col-sm-4 fallback" id="dzId">
+                    <!-- <label for="image">Price</label> -->
+                    <input type="file" name="bookImages[]" id="bookImages" multiple aria-describedby="imageHelp" placeholder="Images">
                   </div>
                 </div>
               </form>
@@ -165,6 +223,15 @@
         return false;
     }, 'Select at lease one author');
 
+    jQuery.validator.addMethod("filecheck", function(a) {
+      var ext = $('#bookImages').val().split('.').pop().toLowerCase();
+      if($.inArray(ext, ['gif','png','jpg','jpeg']) == -1) {
+        return false;
+      } else {
+        return true;
+      }
+    }, 'Only image types allowed');
+
     $("#addbook").validate({
       ignore: null,
       rules: {
@@ -197,6 +264,12 @@
           min: 0.01,
           max: 9999.99,
           currency: ["$", false]
+        },
+        "bookImages[]": {
+          required: true,          
+          extension: "jpg|jpeg|png|gif",
+          filesize: 20971520
+          // filecheck: true
         }
 
       },
@@ -204,9 +277,27 @@
         email: {
           required: "Enter your email address to login",
           email: "Your email address must be in the format of name@domain.com"
+        },
+        "bookImages[]": {
+          extension: "Only images are allowed (jpg | jpeg | png | gif)"
         }
       }
     });
+
+    var myDropzone = new Dropzone(document.querySelector(".dropzone"), { 
+      // url: "/file/post",
+      paramName: bookImages,
+      uploadMultiple: true,
+      acceptedFiles: "image/*",
+      clickable: document.querySelector(".dropzone"),
+      addRemoveLinks: true,
+      autoProcessQueue: false,
+      autoQueue: false,
+      headers: {
+        'x-csrf-token': document.querySelectorAll('meta[name=csrf-token]')[0].getAttributeNode('content').value,
+      }
+    });
+
   </script>
 </body>
 
