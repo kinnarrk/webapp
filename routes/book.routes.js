@@ -32,6 +32,7 @@ var storage = multer.diskStorage({
     }
 })
 var upload = multer({ storage: storage })
+
 // var upload = multer({ dest: '/tmp/uploads' })
 
 const {
@@ -181,7 +182,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
     });
 });
 
-router.post('/create', ensureAuthenticated, upload.array('bookImages[]', 10), function(req, res, next) {
+router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]', 10), function(req, res, next) {
     // upload.array('bookImages', 10), 
     // const {
     //     isbn,
@@ -254,10 +255,14 @@ router.post('/create', ensureAuthenticated, upload.array('bookImages[]', 10), fu
                 // console.info("files:" + req.files['bookImages[]']);
 
                 for (var i = 0; i < req.files.length; i++) {
-                    s3path = s3utils.putObject(req.files[i].path);
+                    // s3path = s3utils.putObject(req.files[i].path);
+                    console.info("S3 path: " + req.files[i]);
                     const bookimages = {
                         bookId: data.id,
-                        imagePath: s3path // req.files[i].path    // full path to the uploaded file
+                        imagePath: req.files[i].location,    // full path to the uploaded file
+                        imageBucket: req.files[i].bucket,
+                        imageName: req.files[i].key,
+                        imageType: req.files[i].contentType
                     }
                     // destination: dir and filename: file name at saved location
                     BookImage.create(bookimages)

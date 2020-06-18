@@ -11,6 +11,18 @@ module.exports = (sequelize, Sequelize) => {
         imagePath: {
             type: Sequelize.STRING,
             allowNull: false
+        },
+        imageBucket: {
+            type: Sequelize.STRING,
+            allowNull: true
+        },
+        imageName: {
+            type: Sequelize.STRING,
+            allowNull: true
+        },
+        imageType: {
+            type: Sequelize.STRING,
+            allowNull: true
         }
     });
     BookImage.associate = function(models) {
