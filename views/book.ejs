@@ -90,7 +90,32 @@
                         <td><%= book.publicationDate %></td>
                         <td><%= book.quantity %></td>
                         <td><%= book.price %></td>                
-                        <td id="bi_<%= book.id %>"><img height="100" src="<%= book.imagePath %>"></td>
+                        <td id="bi_<%= book.id %>">
+                          <!-- <img height="100" src="<%= book.imagePath %>"> -->
+                          <div id="carousel<%= book.id %>" class="carousel slide" data-ride="carousel">
+                            <div class="carousel-inner">
+                              <% 
+                                console.info("imagePaths:" + book.imagePath);
+                                var imageArray = book.imagePath.split(',');
+                                var activeFlag = true;
+                                imageArray.forEach((image) => {
+                                  console.info("image:" + image);
+                              %>                                  
+                                  <div class="carousel-item <%= activeFlag ? 'active' : '' %>">
+                                    <img class="d-block" height="100" src="<%= image %>">
+                                  </div>
+                              <% activeFlag = false; }); %>
+                            </div>
+                            <a class="carousel-control-prev" href="#carousel<%= book.id %>" role="button" data-slide="prev">
+                              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                              <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carousel<%= book.id %>" role="button" data-slide="next">
+                              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                              <span class="sr-only">Next</span>
+                            </a>
+                          </div>
+                        </td>
                         <td>
                           <a href="/books/edit/<%= book.id %>" class="btn btn-info btn-circle">
                             <i class="fas fa-pen"></i>
