@@ -43,7 +43,7 @@ const {
 router.get('/', ensureAuthenticated, (req, res) => {
     errors = [];
     db.sequelize.query("SELECT b.id id, b.isbn isbn, b.title title, date_format(b.publicationDate, '%m/%d/%Y') publicationDate, b.quantity quantity, " +
-                                    " b.price price, group_concat(a.name) as author, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, ANY_VALUE(bi.imagePath) as imagePath " +
+                                    " b.price price, group_concat(a.name) as author, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, group_concat(bi.imagePath) as imagePath " +
                                     " FROM books b join bookAuthors ba on b.id = ba.bookId " +
                                     " join authors a on a.id = ba.authorId join users u on u.id = b.createdBy " +
                                     " left join bookImages bi on b.id = bi.bookId " +
