@@ -149,6 +149,42 @@
                   <div class="form-group col-sm-4 fallback" id="dzId">
                     <!-- <label for="image">Price</label> -->
                     <input type="file" name="bookImages[]" id="bookImages" multiple aria-describedby="imageHelp" placeholder="Images">
+
+                    <br><br>
+                    <% if(typeof book == 'object' && book ) { %>
+                      <h5>Images</h5>
+                      <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Book Image</th>
+                            <th scope="col">Action</th>                          
+                          </tr>
+                        </thead>
+                        <tbody>                          
+                            <% 
+                              var rowNum = 1;
+                              bookImages.forEach((image) => {
+                            %>
+                              <tr id="image<%= image.id %>">
+                                <th scope="row"><%= rowNum %></th>
+                                <td>
+                                  <a href="<%= image.imagePath %>" data-lightbox="image<%= image.id %>">
+                                    <img height="50" src="<%= image.imagePath %>">
+                                  </a>
+                                </td>
+                                <td>
+                                  <a href="#void" onclick="deleteImageSetId(<%= image.id %>)" class="btn btn-danger btn-circle" data-toggle="modal" data-target="#deleteModal">
+                                    <i class="fas fa-trash"></i>
+                                  </a>                                  
+                                </td>                          
+                              </tr>
+                            <% rowNum++;  
+                              }); 
+                            %>                           
+                        </tbody>
+                      </table>
+                    <% } %>
                   </div>
                 </div>
               </form>
@@ -173,6 +209,11 @@
   <a class="scroll-to-top rounded" href="#page-top">
     <i class="fas fa-angle-up"></i>
   </a>
+
+  <% include partials/confirm_delete_modal_ajax %>
+  <script>
+    
+  </script>
 
   <% include partials/logout_modal %>
 
@@ -297,6 +338,50 @@
         'x-csrf-token': document.querySelectorAll('meta[name=csrf-token]')[0].getAttributeNode('content').value,
       }
     });
+
+    function deleteImageSetId(id){
+      $('#confirmDeleteButton').attr("href", "/books/deleteImage/"+id);
+    }
+
+    function deleteImage(obj){
+      // var url = $(this).attr('href');
+      var url = $('#confirmDeleteButton').attr("href");
+      alert("href: " + url);
+      $.ajax({
+        url: url,
+        success: function(response) {
+          if(response == 'success'){
+            alert("Deleted successfully");
+            var id = url.substring(url.lastIndexOf('/') + 1);
+            $("#image"+id).remove();
+          } else {
+            alert("Delete failed");
+          }
+        }
+      });
+      // return false; // for good measure
+    }
+
+    // $('#confirmDeleteButton').click(function(event) {
+    //     event.preventDefault();
+    //     var url = $(this).attr('href');
+    //     alert("href: " + url);
+    //     $.ajax({
+    //         url: $(this).attr('href'),
+    //         success: function(response) {
+    //             if(response == 'success'){
+    //               alert("Deleted successfully");
+    //               var id = url.substring(url.lastIndexOf('/') + 1);
+    //               $("#image"+id).remove();
+    //             } else {
+    //               alert("Delete failed");
+    //             }
+    //         }
+    //     });
+    //     return false; // for good measure
+    // });
+
+
 
   </script>
 </body>

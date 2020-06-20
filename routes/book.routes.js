@@ -43,7 +43,7 @@ const {
 router.get('/', ensureAuthenticated, (req, res) => {
     errors = [];
     db.sequelize.query("SELECT b.id id, b.isbn isbn, b.title title, date_format(b.publicationDate, '%m/%d/%Y') publicationDate, b.quantity quantity, " +
-                                    " b.price price, group_concat(a.name) as author, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, group_concat(bi.imagePath) as imagePath " +
+                                    " b.price price, group_concat(a.name) as author, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, group_concat(DISTINCT(bi.imagePath)) as imagePath " +
                                     " FROM books b join bookAuthors ba on b.id = ba.bookId " +
                                     " join authors a on a.id = ba.authorId join users u on u.id = b.createdBy " +
                                     " left join bookImages bi on b.id = bi.bookId " +
@@ -137,12 +137,12 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
         if(book){
             BookAuthor.findAll( { where: { bookId: book.id }
             }).then(bookAuthors => {
-                console.info("in add 2....");
+                // console.info("in add 2....");
                 if(bookAuthors) {
-                    console.info("in add 3....");
+                    // console.info("in add 3....");
                     Author.findAll( {
                     }).then(authors => {
-                        console.info("in add 22....");
+                        // console.info("in add 22....");
                         if(authors) {
                             // console.info("in add 33...." + book);
                             BookImage.findAll( { where: { bookId: book.id }
@@ -152,6 +152,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
                                     // console.info("in add 3....");
                                     res.render('addBook', {book: book, bookAuthors: bookAuthors, authors: authors, bookImages: bookImages});                                    
                                 } else {
+                                    // console.info("book not found 1");
                                     req.flash(
                                         'error_msg',
                                         'Book not found'
@@ -159,8 +160,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
                                     errors = [];
                                     res.redirect('/books');
                                 }
-                            });
-                            res.render('addBook', {book: book, bookAuthors: bookAuthors, authors: authors});
+                            });                            
                         } else {
                             req.flash(
                                 'error_msg',
@@ -171,6 +171,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
                         }
                     });
                 } else {
+                    console.info("book not found 2");
                     req.flash(
                         'error_msg',
                         'Book not found'
@@ -181,6 +182,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
             });
 
         } else {
+            console.info("book not found 3");
             req.flash(
                 'error_msg',
                 'Book not found'
@@ -366,8 +368,8 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
     errors = [];
     console.info("req.params.id" + req.params.id);
     // Validate request
-    console.info("authors:" + req.body['authors[]'])
-    if (!req.body.isbn || !req.body.title || !req.body.publicationDate || !req.body.quantity || !req.body.price || !req.body['authors[]']) {
+    console.info("authors:" + req.body.authors)
+    if (!req.body.isbn || !req.body.title || !req.body.publicationDate || !req.body.quantity || !req.body.price || !req.body.authors) {
         errors.push({
             msg: 'Fields can not be empty!'
         });
@@ -382,7 +384,8 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
         price: req.body.price,
         updatedBy: req.user.id
     };
-    const bookAuthors = req.body['authors[]'];
+    // const bookAuthors = req.body['authors[]'];
+    const bookAuthors = req.body.authors;
 
     if (errors.length > 0) {
         console.info('errors.length', errors.length);
@@ -391,17 +394,33 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
             console.info("in add 2....");
             if (bookAuthors) {
                 Author.findAll({}).then(authors => {
-                    // console.info("in add 2....");
+                    console.info("in update 2....");
                     if (authors) {
-                        // console.info("in add 3....");
-                        res.render('addBook', {errors, book: book, bookAuthors: bookAuthors, authors: authors});
+                        console.info("in update 3....");
+                        // res.render('addBook', {errors, book: book, bookAuthors: bookAuthors, authors: authors});
+                        BookImage.findAll( { where: { bookId: book.id }
+                        }).then(bookImages => {
+                            // console.info("in add 2....");
+                            if(bookImages) {
+                                // console.info("in add 3....");
+                                // res.render('addBook', {errors, book: book, bookAuthors: bookAuthors, authors: authors, bookImages: bookImages});                                    
+                            } else {
+                                // console.info("book not found 1");
+                                req.flash(
+                                    'error_msg',
+                                    'Book not found'
+                                );
+                                // errors = [];
+                                // res.redirect('/books');
+                            }
+                        });
                     } else {
                         req.flash(
                             'error_msg',
                             'No authors found'
                         );
-                        errors = [];
-                        res.redirect('/books/');
+                        // errors = [];
+                        // res.redirect('/books/');
                     }
                 });
             }
@@ -411,9 +430,9 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
         //     'Error in updating Book!'
         // );
         res.redirect('/books/edit/req.params.id');
-        req.session.flash = [];
+        // req.session.flash = [];
     } else {
-        // console.info('else');
+        console.info('else');
         Book.update(book, {
             where: {id: req.params.id, createdBy: req.user.id}
         })
@@ -441,7 +460,7 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
                     // s3path = s3utils.putObject(req.files[i].path);
                     console.info("S3 path: " + req.files[i]);
                     const bookimages = {
-                        bookId: data.id,
+                        bookId: req.params.id,
                         imagePath: req.files[i].location,    // full path to the uploaded file
                         imageBucket: req.files[i].bucket,
                         imageName: req.files[i].key,
@@ -497,6 +516,14 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
             book.update({
                 isDeleted: true
             }).then(data => {
+                BookImage.findAll({ where: { bookId: book.id}
+                })
+                .then(bookImages => {
+                    for (var i = 0; i < bookImages.length; i++) {
+                        console.info("File deleting... " + bookImages[i].imageName);
+                        s3utils.deleteS3Object(bookImages[i]);
+                    }
+                })
                 req.flash(
                     'success_msg',
                     'Book deleted successfully!'
@@ -586,6 +613,31 @@ router.get('/image/:imageFile', ensureAuthenticated, (req, res, next) => {
         //     let base64 = buf.toString('base64');
         //     return base64
         // }
+    });
+});
+
+router.get('/deleteImage/:id', ensureAuthenticated, function(req, res, next) {
+
+    console.info("delete image req.params.id" + req.params.id);
+    // Validate request
+    BookImage.findOne({ where: { id: req.params.id}
+    })
+    .then(bookImage => {
+        console.info("Image found for delete");
+        BookImage.destroy({ where: { id: req.params.id }
+        })
+        .then(function() {
+            console.info("Image deleted successfully");
+            //delete s3 item
+            s3utils.deleteS3Object(bookImage);
+            res.send('success');
+        })
+        .catch(err => {
+            res.send('failed');
+        });
+    })
+    .catch(err => {
+        res.send('failed');
     });
 });
 
