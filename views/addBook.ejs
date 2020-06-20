@@ -346,14 +346,13 @@
     function deleteImage(obj){
       // var url = $(this).attr('href');
       var url = $('#confirmDeleteButton').attr("href");
-      alert("href: " + url);
       $.ajax({
         url: url,
         success: function(response) {
           if(response == 'success'){
-            alert("Deleted successfully");
             var id = url.substring(url.lastIndexOf('/') + 1);
             $("#image"+id).remove();
+            alert("Deleted successfully");
           } else {
             alert("Delete failed");
           }
