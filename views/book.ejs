@@ -94,15 +94,15 @@
                           <!-- <img height="100" src="<%= book.imagePath %>"> -->
                           <div id="carousel<%= book.id %>" class="carousel slide" data-ride="carousel">
                             <div class="carousel-inner">
-                              <% 
-                                console.info("imagePaths:" + book.imagePath);
+                              <%                                 
                                 var imageArray = book.imagePath.split(',');
                                 var activeFlag = true;
                                 imageArray.forEach((image) => {
-                                  console.info("image:" + image);
                               %>                                  
                                   <div class="carousel-item <%= activeFlag ? 'active' : '' %>">
-                                    <img class="d-block" height="100" src="<%= image %>">
+                                    <a href="<%= image %>" data-lightbox="book<%= book.id %>">
+                                      <img class="d-block" height="100" src="<%= image %>">
+                                    </a>
                                   </div>
                               <% activeFlag = false; }); %>
                             </div>
