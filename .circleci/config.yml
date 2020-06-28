@@ -51,7 +51,7 @@ jobs:
                     --deployment-group-name $CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME \
                     --s3-location bucket=S3_CODEDEPLOY_BUCKET,bundleType=zip,key=csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip \
                     --region $AWS_DEFAULT_REGION \
-                    --output.json
+                    --output json
           name: CodeDeploy API call to deploy on EC2
 workflows:
   version: 2
