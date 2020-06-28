@@ -16,5 +16,5 @@ then
     cd ~/node
     pm2 stop www || true
     cd ~
-    rm -rf node
+    sudo rm -rf node
 fi
