@@ -31,7 +31,7 @@ jobs:
           command: sudo apt update -y && sudo apt-get install zip unzip -y
           name: Install Zip
       - run:
-          command: zip -r csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip .
+          command: zip --exclude '*.git*' -r csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip .
           name: Create Zip before node_modules take over
       - run:
           command: mkdir codedeploy_artifact && mv csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip codedeploy_artifact/
