@@ -4,9 +4,9 @@ set -e
 if [ -d "~/node" ] 
 then
     # this is a workaround
-    if ls /opt/codedeploy-agent/deployment-root/deployment-instructions/*.cleanup 1> /dev/null 2>&1;
+    if ls /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup 1> /dev/null 2>&1;
     then
-        rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*.cleanup
+        rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup
     fi
     
     cd ~/node
