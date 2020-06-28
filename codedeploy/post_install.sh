@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
+if [ -d "~/node" ] 
+then
+    cd ~/node
+    sudo pm2 stop www || true
+    sudo pm2 delete www
+    sudo pm2 save --force
+    sudo pm2 cleardump
+    cd ~
+    rm -rf ~/node
+fi
+
 cd ~/node
 npm install
 
