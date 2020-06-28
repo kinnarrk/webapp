@@ -1,0 +1,39 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /home/ubuntu/node
+
+permissions:
+  - object: /home/ubuntu
+    owner: ubuntu
+    group: ubuntu
+    type:
+      - directory
+      - file
+
+hooks:
+  BeforeInstall:
+    - location: install.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: post_install.sh
+      timeout: 600
+      runas: ubuntu
+  ApplicationStart:
+    - location: run.sh
+      timeout: 120
+      runas: ubuntu
+  ApplicationStop:
+    - location: stop.sh
+      timeout: 120
+      runas: ubuntu
+  # ApplicationCleanup:
+  #   - location: cleanup.sh
+  #     timeout: 60
+  #     runas: ubuntu
+  ValidateService:
+    - location: validate.sh
+      timeout: 60
+      runas: ubuntu

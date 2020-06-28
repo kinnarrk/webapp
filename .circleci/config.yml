@@ -1,3 +1,4 @@
+version: 2.1
 jobs:
   build:
     docker:
@@ -32,7 +33,7 @@ jobs:
           name: Install Zip
       - run:
           command: zip -9 --exclude '*.git*' -r csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip .
-          name: Create Zip before node_modules take over
+          name: Create Zip with full compression before node_modules take over
       - run:
           command: mkdir codedeploy_artifact && mv csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip codedeploy_artifact/
           name: move zip file to new dir
@@ -40,8 +41,17 @@ jobs:
           command: npm install && npm test
           name: Install packages and run tests
       - run:
-          command: aws s3 cp codedeploy_artifact/csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip s3://codedeploy.$DEPLOY_ENV.kinnarkansara.me/csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip
+          command: aws s3 cp codedeploy_artifact/csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip s3://$S3_CODEDEPLOY_BUCKET/csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip
           name: Push artifact to s3 bucket
+      - run:
+          command: aws deploy create-deployment \
+                    --application-name $CODEDEPLOY_APPLICATION_NAME \
+                    --deployment-config-name CodeDeployDefault.AllAtOnce \
+                    --deployment-group-name $CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME \
+                    --s3-location bucket=S3_CODEDEPLOY_BUCKET,bundleType=zip,key=csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip \
+                    --region $AWS_DEFAULT_REGION \
+                    --output.json
+          name: CodeDeploy API call to deploy on EC2
 workflows:
   version: 2
   pr-check:
