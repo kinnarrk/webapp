@@ -14,26 +14,26 @@ permissions:
 
 hooks:
   BeforeInstall:
-    - location: install.sh
+    - location: ./codedeploy/install.sh
       timeout: 300
       runas: root
   AfterInstall:
-    - location: post_install.sh
+    - location: ./codedeploy/post_install.sh
       timeout: 600
       runas: ubuntu
   ApplicationStart:
-    - location: run.sh
+    - location: ./codedeploy/run.sh
       timeout: 120
       runas: ubuntu
   ApplicationStop:
-    - location: stop.sh
+    - location: ./codedeploy/stop.sh
       timeout: 120
       runas: ubuntu
   # ApplicationCleanup:
-  #   - location: cleanup.sh
+  #   - location: ./codedeploy/cleanup.sh
   #     timeout: 60
   #     runas: ubuntu
   ValidateService:
-    - location: validate.sh
+    - location: ./codedeploy/validate.sh
       timeout: 60
       runas: ubuntu
