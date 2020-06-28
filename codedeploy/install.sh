@@ -15,6 +15,9 @@ if [ -d "~/node" ]
 then
     cd ~/node
     pm2 stop www || true
+    pm2 delete www
+    pm2 save --force
+    pm2 cleardump
     cd ~
-    sudo rm -rf node
+    sudo rm -rf ~/node
 fi
