@@ -44,7 +44,8 @@ jobs:
           command: aws s3 cp codedeploy_artifact/csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip s3://$S3_CODEDEPLOY_BUCKET/csye-6225-bookstore-$CIRCLE_BUILD_NUM.zip
           name: Push artifact to s3 bucket
       - run:
-          command: aws deploy create-deployment \
+          command: |
+                  aws deploy create-deployment \
                     --application-name $CODEDEPLOY_APPLICATION_NAME \
                     --deployment-config-name CodeDeployDefault.AllAtOnce \
                     --deployment-group-name $CODEDEPLOY_APPLICATION_DEPLOYMENT_GROUP_NAME \
