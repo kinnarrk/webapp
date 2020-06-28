@@ -2,6 +2,6 @@
 if [ ! -z "$DEPLOYMENT_GROUP_NAME" ]; then
  export NODE_ENV=$DEPLOYMENT_GROUP_NAME
 fi
-export PORT=80
+
 cd ~/node
 sudo pm2 start bin/www -n www -i 0

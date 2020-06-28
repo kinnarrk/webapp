@@ -3,20 +3,20 @@ jobs:
   build:
     docker:
       - image: circleci/node:latest
-      - image: circleci/mysql:5.7.30
-        environment:
-         MYSQL_ROOT_PASSWORD: root
-         MYSQL_DATABASE: assignment
+      # - image: circleci/mysql:5.7.30
+      #   environment:
+      #    MYSQL_ROOT_PASSWORD: root
+      #    MYSQL_DATABASE: assignment
     steps:
       - checkout
       - run: npm install
   test:
     docker:
       - image: circleci/node:latest
-      - image: circleci/mysql:5.7.30
-        environment:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: assignment
+      # - image: circleci/mysql:5.7.30
+      #   environment:
+      #     MYSQL_ROOT_PASSWORD: root
+      #     MYSQL_DATABASE: assignment
     steps:
       - checkout      
       - run:

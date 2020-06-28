@@ -7,7 +7,6 @@ npm install
 # setup NODE_ENV
 if [ ! -z "$DEPLOYMENT_GROUP_NAME" ]; then
     export NODE_ENV=$DEPLOYMENT_GROUP_NAME
-    export PORT=80
     hasEnv=`grep "export NODE_ENV" ~/.profile | cat`
     if [ -z "$hasEnv" ]; then
         echo "export NODE_ENV=$DEPLOYMENT_GROUP_NAME" >> ~/.profile
