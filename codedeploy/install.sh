@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
+if [ -d "~/node" ] 
+then
+    cd ~/node
+    pm2 stop www || true
+    # sudo pm2 delete www
+    # sudo pm2 save --force
+    # sudo pm2 cleardump
+    # pm2 kill
+    # npm remove pm2 -g
+    npm prune
+    cd ~
+    rm -rf ~/node
+fi
 # update instance
 # sudo apt -y update
 

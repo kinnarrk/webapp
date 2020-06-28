@@ -1,24 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-if [ -d "~/node" ] 
-then
-    cd ~/node
-    sudo pm2 stop www || true
-    sudo pm2 delete www
-    sudo pm2 save --force
-    sudo pm2 cleardump
-    cd ~
-    rm -rf ~/node
-fi
-
 cd ~/node
 npm install
 
 # setup NODE_ENV
 if [ ! -z "$DEPLOYMENT_GROUP_NAME" ]; then
     export NODE_ENV=$DEPLOYMENT_GROUP_NAME
-
+    export PORT=80
     hasEnv=`grep "export NODE_ENV" ~/.profile | cat`
     if [ -z "$hasEnv" ]; then
         echo "export NODE_ENV=$DEPLOYMENT_GROUP_NAME" >> ~/.profile

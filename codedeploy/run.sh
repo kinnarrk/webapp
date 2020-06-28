@@ -4,4 +4,4 @@ if [ ! -z "$DEPLOYMENT_GROUP_NAME" ]; then
 fi
 
 cd ~/node
-pm2 start bin/www -n www -i 0
+sudo pm2 start bin/www -n www -i 0
