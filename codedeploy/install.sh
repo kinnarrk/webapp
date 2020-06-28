@@ -3,6 +3,12 @@ set -e
 
 if [ -d "~/node" ] 
 then
+    # this is a workaround
+    if [ -f "/opt/codedeploy-agent/deployment-root/deployment-instructions/*.cleanup"]
+    then
+        rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*.cleanup
+    fi
+    
     cd ~/node
     pm2 stop www || true
     # sudo pm2 delete www
