@@ -29,10 +29,6 @@ hooks:
     - location: codedeploy/stop.sh
       timeout: 120
       runas: ubuntu
-  # ApplicationCleanup:
-  #   - location: ./codedeploy/cleanup.sh
-  #     timeout: 60
-  #     runas: ubuntu
   ValidateService:
     - location: codedeploy/validate.sh
       timeout: 60
