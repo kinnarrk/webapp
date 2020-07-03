@@ -6,7 +6,7 @@ then
     # this is a workaround
     if ls /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup 1> /dev/null 2>&1;
     then
-        sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup
+        sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*
     fi
     
     cd ~/node
@@ -29,3 +29,4 @@ fi
 # install pm2 module globaly
 npm list pm2 || npm install -g pm2
 pm2 update
+
