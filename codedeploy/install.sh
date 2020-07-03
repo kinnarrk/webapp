@@ -6,7 +6,7 @@ then
     # this is a workaround
     if ls /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup 1> /dev/null 2>&1;
     then
-        sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup
+        sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*
     fi
     
     cd ~/node
