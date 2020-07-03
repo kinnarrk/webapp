@@ -1,25 +1,21 @@
 #!/usr/bin/env bash
 set -e
 
-if [ -d "~/node" ] 
-then
+# if [ -d "~/node" ] 
+# then
     # this is a workaround
-    if ls /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup 1> /dev/null 2>&1;
-    then
-        sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup
-    fi
+    # if ls /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup 1> /dev/null 2>&1;
+    # then
+    #     sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup
+    # fi
     
-    cd ~/node
-    pm2 stop www || true
-    # sudo pm2 delete www
-    # sudo pm2 save --force
-    # sudo pm2 cleardump
-    # pm2 kill
-    # npm remove pm2 -g
-    npm prune
-    cd ~
-    rm -rf ~/node
-fi
+    # cd ~/node
+    # pm2 stop www || true
+    
+    # npm prune
+    # cd ~
+    # rm -rf ~/node
+# fi
 # update instance
 # sudo apt -y update
 

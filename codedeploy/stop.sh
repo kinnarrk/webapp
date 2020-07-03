@@ -2,4 +2,6 @@
 cd ~/node
 sudo pm2 stop www || true
 
-sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*
+cd ~
+rm -rf ~/node
+sudo rm -f /opt/codedeploy-agent/deployment-root/deployment-instructions/*cleanup
