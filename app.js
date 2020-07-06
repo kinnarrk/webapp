@@ -4,12 +4,13 @@ const passport = require('passport');
 var path = require('path');
 // var fs = require('fs');
 // var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+var morgan = require('morgan');
 const bodyParser = require("body-parser");
 const flash = require('connect-flash');
 const session = require('express-session');
+var winston = require('./config/winston');
 
-// var env = process.env.NODE_ENV || 'development';
+var env = process.env.NODE_ENV || 'development';
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/user.routes');
@@ -23,7 +24,9 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(logger('dev'));
+// app.use(logger('dev'));
+app.use(morgan('combined'));
+// app.use(morgan('combined', { stream: winston.stream }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser());
@@ -85,6 +88,9 @@ app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+
+  // add this line to include winston logging
+  winston.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 
   // render the error page
   res.status(err.status || 500);

@@ -15,6 +15,8 @@ const passwordValidator = require('password-validator');
 const passwordPattern = new passwordValidator();
 const bcrypt = require('bcryptjs');
 
+var logger = require('../config/winston');
+
 const {
     ensureAuthenticated
 } = require('../config/auth');
@@ -27,6 +29,7 @@ router.get('/login', (req, res) => {
     errors = [];
     res.render('login');
     req.session.flash = [];
+    logger.info('User route login get');
 });
 
 //Login

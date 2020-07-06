@@ -2,6 +2,8 @@ var express = require('express');
 var router = express.Router();
 const db = require("../models");
 
+var logger = require('../config/winston');
+
 const {
   ensureAuthenticated
 } = require('../config/auth');
@@ -23,10 +25,12 @@ router.get('/', ensureAuthenticated, function(req, res, next) {
               {'name':'Charles Dickens', 'createdAt': '2020-01-01 00:00:00', 'updatedAt': '2020-01-01 00:00:00'},
               {'name':'Franz Kafka', 'createdAt': '2020-01-01 00:00:00', 'updatedAt': '2020-01-01 00:00:00'}
           ];
-          db.authors.bulkCreate(authorData, { individualHooks: true })
+          db.authors.bulkCreate(authorData, { individualHooks: true });
+          logger.info('Authors injected for the first time');
       }
   });
   res.render('index', { title: 'Kinnar' });
+  logger.info('Index controller passed');
 });
 
 module.exports = router;
