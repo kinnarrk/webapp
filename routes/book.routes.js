@@ -242,6 +242,7 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
     errors = [];
     // Validate request
     console.info("authors:" + req.body.authors);
+    const starts3timer = process.hrtime();
     // console.info("files:" + req.files.bookImages);
     // console.info("authors:" + req.body['authors[]'])
     // console.info("files:" + req.files.length);
@@ -305,6 +306,10 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
 
                 for (var i = 0; i < req.files.length; i++) {
                     // s3path = s3utils.putObject(req.files[i].path);
+                    if(i == 0){
+                        const durationInMillisecondss3 = util.getDurationInMilliseconds(starts3timer);
+                        client.timing('s3_upload_image', durationInMillisecondss3);
+                    }
                     console.info("S3 path: " + req.files[i]);
                     const bookimages = {
                         bookId: data.id,
@@ -401,6 +406,9 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
         authors
     } = req.body;
     errors = [];
+
+    const starts3timer = process.hrtime();
+
     // console.info("req.params.id" + req.params.id);
     // Validate request
     // console.info("authors:" + req.body.authors)
@@ -496,6 +504,10 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
                 for (var i = 0; i < req.files.length; i++) {
                     // s3path = s3utils.putObject(req.files[i].path);
                     // console.info("S3 path: " + req.files[i]);
+                    if(i == 0){
+                        const durationInMillisecondss3 = util.getDurationInMilliseconds(starts3timer);
+                        client.timing('s3_upload_image', durationInMillisecondss3);
+                    }
                     const bookimages = {
                         bookId: req.params.id,
                         imagePath: req.files[i].location,    // full path to the uploaded file
