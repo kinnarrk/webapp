@@ -4,7 +4,10 @@ if [ ! -z "$DEPLOYMENT_GROUP_NAME" ]; then
 fi
 
 # restart cloudwatch
-sudo systemctl restart amazon-cloudwatch-agent
+cd ~/node
+sudo systemctl stop amazon-cloudwatch-agent
+sudo cp -f amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+sudo systemctl start amazon-cloudwatch-agent
 
 cd ~/node
 pm2 start bin/www -n www -i 0

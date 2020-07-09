@@ -25,6 +25,3 @@ set -e
 # install pm2 module globaly
 npm list pm2 || npm install -g pm2
 pm2 update
-
-cd ~/node
-yes | sudo cp -f amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
