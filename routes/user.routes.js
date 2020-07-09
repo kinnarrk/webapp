@@ -49,7 +49,7 @@ router.get('/login', (req, res) => {
     res.render('login');
     req.session.flash = [];
     // logger.info('User route login get');
-    logger.info(`Requested ${req.method} ${req.originalUrl} ${time}ms`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 //Login
@@ -270,7 +270,7 @@ router.post('/profile', ensureAuthenticated, (req, res) => {
             logger.error(`Profile update error`, {tags: 'http', additionalInfo: {error: err}});
         });
     }
-    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {headers: req.headers }});
 });
 
 router.get('/changePassword', ensureAuthenticated, (req, res) => {
@@ -391,7 +391,7 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
             }
         });
     }
-    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {headers: req.headers }});
 });
 
 // router.post("/", users.create);
