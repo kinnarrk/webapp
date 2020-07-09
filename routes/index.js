@@ -11,8 +11,9 @@ var util = require('../lib/utils');
 router.use((req, res, next) => {
     const start = process.hrtime()
     res.on('finish', () => {            
-        const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
-        client.timing(`${req.originalUrl}`, durationInMilliseconds);
+        const durationInMilliseconds = util.getDurationInMilliseconds(start);
+        var metric_name = "url" + req.originalUrl.replace(/[|&;$%@"<>()+,\/]/g, "-");
+        client.timing(metric_name, durationInMilliseconds);
     })        
     next()
 })

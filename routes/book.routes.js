@@ -32,7 +32,8 @@ router.use((req, res, next) => {
     const start = process.hrtime()
     res.on('finish', () => {            
         const durationInMilliseconds = util.getDurationInMilliseconds(start);
-        client.timing(`${req.originalUrl}`, durationInMilliseconds);
+        var metric_name = "url" + req.originalUrl.replace(/[|&;$%@"<>()+,\/]/g, "-");
+        client.timing(metric_name, durationInMilliseconds);
     })        
     next()
 })

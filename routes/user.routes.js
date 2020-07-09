@@ -29,8 +29,9 @@ router.use((req, res, next) => {
 
     res.on('finish', () => {            
         const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
-        client.timing(`${req.originalUrl}`, durationInMilliseconds);
-        logger.info(`${req.method} ${req.originalUrl} [FINISHED] ${durationInMilliseconds.toLocaleString()} ms`);
+        var metric_name = "url" + req.originalUrl.replace(/[|&;$%@"<>()+,\/]/g, "-");
+        client.timing(metric_name, durationInMilliseconds);
+        logger.info(`${req.method} ${req.originalUrl} ${metric_name} [FINISHED] ${durationInMilliseconds.toLocaleString()} ms`);
     })
     // res.on('close', () => {
     //     const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
