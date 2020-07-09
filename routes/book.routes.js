@@ -308,7 +308,7 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
                     // s3path = s3utils.putObject(req.files[i].path);
                     if(i == 0){
                         const durationInMillisecondss3 = util.getDurationInMilliseconds(starts3timer);
-                        client.timing('s3_upload_image', durationInMillisecondss3);
+                        client.timing('s3_upload_image2', durationInMillisecondss3);
                     }
                     console.info("S3 path: " + req.files[i]);
                     const bookimages = {
@@ -506,7 +506,7 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
                     // console.info("S3 path: " + req.files[i]);
                     if(i == 0){
                         const durationInMillisecondss3 = util.getDurationInMilliseconds(starts3timer);
-                        client.timing('s3_upload_image', durationInMillisecondss3);
+                        client.timing('s3_upload_image2', durationInMillisecondss3);
                     }
                     const bookimages = {
                         bookId: req.params.id,
