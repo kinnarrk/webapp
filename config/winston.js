@@ -14,12 +14,13 @@ const AWS = require('aws-sdk');
  
 var profileName = 'dev';
 var regionName = 'us-east-1';
-var logGroupName = 'BookstoreCSYE6225';
+var logGroupName = 'BookstoreTest';
 var logStreamName = 'webapp';
 
 if(process.env.NODE_ENV == 'production'){
   profileName = process.env.IAMInstanceProfileName;
   regionName = process.env.DEPLOYMENT_REGION;
+  logGroupName = process.env.LOG_GROUP_NAME || 'BookstoreCSYE6225';
   logStreamName = 'webapp-prod';
   // logGroupName = process.env.LOG_GROUP_NAME;
   // logStreamName = process.env.LOG_STREAM_NAME;
