@@ -24,7 +24,6 @@ if(process.env.NODE_ENV == 'production'){
   logStreamName = 'webapp-prod';
   // logGroupName = process.env.LOG_GROUP_NAME;
   // logStreamName = process.env.LOG_STREAM_NAME;
-
 } else {
   console.info("Running Env: " + process.env.NODE_ENV);
   var credentials = new AWS.SharedIniFileCredentials({profile: profileName});
