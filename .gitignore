@@ -117,3 +117,5 @@ dist
 
 # ide specific
 .idea
+
+*audit.json

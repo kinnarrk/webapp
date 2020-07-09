@@ -3,11 +3,35 @@ const fs = require('fs');
 const path = require('path');
 
 // var appRoot = require('app-root-path');
-var winston = require('winston');
+var winston = require('winston'),
+  WinstonCloudWatch = require('winston-cloudwatch');
 require('winston-daily-rotate-file');
 
 const env = process.env.NODE_ENV || 'development';
 const logDir = 'logs';
+
+const AWS = require('aws-sdk');
+ 
+var profileName = 'dev';
+var regionName = 'us-east-1';
+var logGroupName = 'BookstoreCSYE6225';
+var logStreamName = 'webapp';
+
+if(process.env.NODE_ENV == 'production'){
+  profileName = process.env.IAMInstanceProfileName;
+  regionName = process.env.DEPLOYMENT_REGION;
+  logStreamName = 'webapp-prod';
+  // logGroupName = process.env.LOG_GROUP_NAME;
+  // logStreamName = process.env.LOG_STREAM_NAME;
+
+} else {
+  console.info("Running Env: " + process.env.NODE_ENV);
+  var credentials = new AWS.SharedIniFileCredentials({profile: profileName});
+  AWS.config.credentials = credentials;
+}
+
+AWS.config.update({ region: regionName });
+
 
 // Create the log directory if it does not exist
 if (!fs.existsSync(logDir)) {
@@ -85,5 +109,12 @@ logger.stream = {
     logger.info(message);
   },
 };
+
+logger.add(new WinstonCloudWatch({
+  cloudWatchLogs: new AWS.CloudWatchLogs(),
+  logGroupName: logGroupName,
+  logStreamName: logStreamName,
+  messageFormatter: ({ level, message, additionalInfo }) => `[${level}] : ${message} \nAdditional Info: ${JSON.stringify(additionalInfo)}}`
+}));
 
 module.exports = logger;

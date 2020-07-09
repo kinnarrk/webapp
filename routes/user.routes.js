@@ -17,9 +17,28 @@ const bcrypt = require('bcryptjs');
 
 var logger = require('../config/winston');
 
+var StatsD = require('node-statsd'),
+      client = new StatsD();
+
 const {
     ensureAuthenticated
 } = require('../config/auth');
+
+router.use((req, res, next) => {
+    const start = process.hrtime()
+
+    res.on('finish', () => {            
+        const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
+        client.timing(`${req.originalUrl}`, durationInMilliseconds);
+        logger.info(`${req.method} ${req.originalUrl} [FINISHED] ${durationInMilliseconds.toLocaleString()} ms`);
+    })
+    // res.on('close', () => {
+    //     const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
+    //     client.timing(`${req.originalUrl}`, durationInMilliseconds);
+    //     logger.info(`${req.method} ${req.originalUrl} [CLOSED] ${durationInMilliseconds.toLocaleString()} ms`);
+    // })
+    next()
+})
 
 /* GET users listing. */
 // router.post('/', function(req, res, next) {
@@ -29,17 +48,22 @@ router.get('/login', (req, res) => {
     errors = [];
     res.render('login');
     req.session.flash = [];
-    logger.info('User route login get');
+    // logger.info('User route login get');
+    logger.info(`Requested ${req.method} ${req.originalUrl} ${time}ms`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 //Login
 router.post('/login', (req, res, next) => {
-    console.log("return path=" + req.session.returnTo);
+    // console.log("return path=" + req.session.returnTo);
+    const start = process.hrtime()
     passport.authenticate('local', {
         successRedirect: req.session.returnTo || '/',
         failureRedirect: '/users/login',
         failureFlash: true
     })(req, res, next);
+    const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
+    client.timing('login_query', durationInMilliseconds);
+    logger.info(`Requested ${req.method} ${req.originalUrl}`);
 });
 
 // router.post('/login',
@@ -51,6 +75,7 @@ router.post('/login', (req, res, next) => {
 router.get('/register', function(req, res, next) {
     res.render('register');
     req.session.flash = [];
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.post('/register', function(req, res, next) {
@@ -66,6 +91,7 @@ router.post('/register', function(req, res, next) {
         errors.push({
             msg: 'Fields can not be empty!'
         });
+        logger.error(`One or more registreation fields empty`);
     }
 
     // console.info("past empty validation")
@@ -85,6 +111,7 @@ router.post('/register', function(req, res, next) {
         errors.push({
             msg: 'Please enter valid E-mail'
         });
+        logger.error(`Invalid email address`);
         // console.info('error in validEmail');
     }
 
@@ -92,6 +119,7 @@ router.post('/register', function(req, res, next) {
         errors.push({
             msg: 'Password must contain minimum 8 characters with at least 1 uppercase, 1 lowercase, 1 digit and 1 symbol'
         });
+        logger.error(`Insufficient password rule`);
         // console.info('error in validPassword');
     }
     if (errors.length > 0) {
@@ -106,6 +134,7 @@ router.post('/register', function(req, res, next) {
         req.session.flash = [];
     } else {
         // console.info('else');
+        const start = process.hrtime()
         User.findOne({
             where: { email: req.body.email }
         }).then(user => {
@@ -123,6 +152,7 @@ router.post('/register', function(req, res, next) {
                     password
                 });
                 req.session.flash = [];
+                logger.error(`Email address already exists in database`);
             } else {
                 // Create a User
                 // console.info('creating user');
@@ -141,6 +171,8 @@ router.post('/register', function(req, res, next) {
                         // Save User in the database
                         User.create(user1)
                             .then(data => {
+                                const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
+                                client.timing('register_query', durationInMilliseconds);
                                 req.flash(
                                     'success_msg',
                                     'You are successfully registered'
@@ -154,7 +186,8 @@ router.post('/register', function(req, res, next) {
                                     'error_msg',
                                     'Error occurred in registration'
                                 );
-                                console.info('insert error', err);
+                                // console.info('insert error', err);
+                                logger.error(`User creation error`, {tags: 'http', additionalInfo: {error: err}});
                             });
                     // });
                 // });
@@ -163,12 +196,14 @@ router.post('/register', function(req, res, next) {
             }
         });
     }
+    logger.info(`Requested ${req.method} ${req.originalUrl}`);
 });
 
 router.get('/profile', ensureAuthenticated, (req, res) => {
     errors = [];
     res.render('profile');
     req.session.flash = [];
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.post('/profile', ensureAuthenticated, (req, res) => {
@@ -184,6 +219,7 @@ router.post('/profile', ensureAuthenticated, (req, res) => {
         errors.push({
             msg: 'Fields can not be empty!'
         });
+        logger.error(`One of the fields in profile empty`);
     }
 
     if (errors.length > 0) {
@@ -198,6 +234,7 @@ router.post('/profile', ensureAuthenticated, (req, res) => {
     } else {
         // Update a User
         // console.info('updating user');
+        const start = process.hrtime();
         const user1 = {
             first_name: req.body.first_name,
             last_name: req.body.last_name
@@ -208,6 +245,8 @@ router.post('/profile', ensureAuthenticated, (req, res) => {
         })
         .then(num => {
             if (num == 1) {
+                const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
+                client.timing('profile_update_query', durationInMilliseconds);
                 req.flash(
                     'success_msg',
                     'Profile was updated successfully.'
@@ -228,14 +267,17 @@ router.post('/profile', ensureAuthenticated, (req, res) => {
                 'error_msg',
                 'Error updating profile'
             );
+            logger.error(`Profile update error`, {tags: 'http', additionalInfo: {error: err}});
         });
     }
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/changePassword', ensureAuthenticated, (req, res) => {
     errors = [];
     res.render('changePassword');
     req.session.flash = [];
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.post('/changePassword', ensureAuthenticated, (req, res) => {
@@ -248,6 +290,7 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
         errors.push({
             msg: 'Fields can not be empty!'
         });
+        logger.error(`One or more change password fields empty`);
     }
 
     if (req.body.oldPassword == req.body.newPassword) {
@@ -270,10 +313,8 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
             msg: 'Password must contain minimum 8 characters with at least 1 uppercase, 1 lowercase, 1 digit and 1 symbol'
         });
         // console.info('error in validPassword');
+        logger.error(`Insufficient password strength in change password`);
     }
-
-
-
 
     if (errors.length > 0) {
         // console.info('errors.length', errors.length);
@@ -284,6 +325,7 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
     } else {
         // Update a User
         // console.info('updating user');
+        const start = process.hrtime();
         const user1 = {
             password: req.body.newPassword,
         };
@@ -302,6 +344,8 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
                                     where: {id: req.user.id}
                                 }).then(num => {
                                     if (num == 1) {
+                                        const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
+                                        client.timing('change_password_query', durationInMilliseconds);
                                         req.flash(
                                             'success_msg',
                                             'Password changed successfully.'
@@ -316,6 +360,7 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
                                             'Error changing password'
                                         );
                                         res.redirect('/users/changePassword');
+                                        logger.error(`Password not updated in database`);
                                     }
                                 }).catch(err => {
                                     req.flash(
@@ -323,6 +368,7 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
                                         'Error changing password'
                                     );
                                     res.redirect('/users/changePassword');
+                                    logger.error(`Password update error`, {tags: 'http', additionalInfo: {error: err}});
                                 });
                             });
                         });
@@ -332,6 +378,7 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
                             'Old password incorrect!'
                         );
                         res.redirect('/users/changePassword');
+                        logger.error(`Incorrect old password`);
                     }
                 });
             } else {
@@ -340,9 +387,11 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
                     'Invalid user request!'
                 );
                 res.redirect('/users/changePassword');
+                logger.error(`User not found for change password`);
             }
         });
     }
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 // router.post("/", users.create);
@@ -354,6 +403,7 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
 router.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 module.exports = router;

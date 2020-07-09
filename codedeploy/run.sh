@@ -6,4 +6,6 @@ fi
 cd ~/node
 pm2 start bin/www -n www -i 0
 
+# making pm2 to run at startup
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ubuntu --hp /home/ubuntu
 # sleep 60

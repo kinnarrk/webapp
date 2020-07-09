@@ -22,6 +22,21 @@ var multer  = require('multer')
 var s3utils = require('../lib/s3Utils');
 var s3 = s3utils.s3
 
+var logger = require('../config/winston');
+
+var StatsD = require('node-statsd'),
+      client = new StatsD();
+
+var util = require('../lib/utils');
+router.use((req, res, next) => {
+    const start = process.hrtime()
+    res.on('finish', () => {            
+        const durationInMilliseconds = util.getDurationInMilliseconds(start);
+        client.timing(`${req.originalUrl}`, durationInMilliseconds);
+    })        
+    next()
+})
+
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, '/tmp/uploads')
@@ -41,7 +56,9 @@ const {
 } = require('../config/auth');
 
 router.get('/', ensureAuthenticated, (req, res) => {
+    client.increment('view_books');
     errors = [];
+    const start = process.hrtime()
     db.sequelize.query("SELECT b.id id, b.isbn isbn, b.title title, date_format(b.publicationDate, '%m/%d/%Y') publicationDate, b.quantity quantity, " +
                                     " b.price price, group_concat(a.name) as author, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, group_concat(DISTINCT(bi.imagePath)) as imagePath " +
                                     " FROM books b join bookAuthors ba on b.id = ba.bookId " +
@@ -49,11 +66,13 @@ router.get('/', ensureAuthenticated, (req, res) => {
                                     " left join bookImages bi on b.id = bi.bookId " +
                                     " where b.isDeleted = 0 and b.createdBy = " + req.user.id + " GROUP BY id ORDER BY b.price ASC", { type: QueryTypes.SELECT })
         .then(function(books){
+            const durationInMilliseconds = util.getDurationInMilliseconds(start);
+            client.timing('user_list_book_query', durationInMilliseconds);
             res.render('book', {books: books});
             req.session.flash = [];
         });
 
-
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 
     // Book.findAll({ where: { isDeleted: false, createdBy: req.user.id },
     //     include: [
@@ -108,8 +127,10 @@ router.get('/add', ensureAuthenticated, (req, res, next) => {
             );
             errors = [];
             res.redirect('/books/');
+            logger.error(`Could not retrieve authors for add book page`);
         }
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
@@ -159,6 +180,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
                                     );
                                     errors = [];
                                     res.redirect('/books');
+                                    logger.error(`Book images not found`);
                                 }
                             });                            
                         } else {
@@ -168,6 +190,7 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
                             );
                             errors = [];
                             res.redirect('/books');
+                            logger.error(`Unable to retrieve authors from database`);
                         }
                     });
                 } else {
@@ -178,17 +201,19 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
                     );
                     errors = [];
                     res.redirect('/books');
+                    logger.error(`Book author detail not found from database`);
                 }
             });
 
         } else {
-            console.info("book not found 3");
+            // console.info("book not found 3");
             req.flash(
                 'error_msg',
                 'Book not found'
             );
             errors = [];
             res.redirect('/books');
+            logger.error(`Required book not found from database`);
         }
     })
     .catch(err => {
@@ -196,9 +221,11 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
             'error_msg',
             'Error occurred in getting book details!'
         );
-        console.info('edit error', err);
+        // console.info('edit error', err);
+        logger.error(`Data retrieval error in edit book`, {tags: 'http', additionalInfo: {error: err}});
         res.redirect('/books');
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]', 10), function(req, res, next) {
@@ -252,8 +279,10 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
             }
         });
         req.session.flash = [];
+        logger.error(`Required fields not submitted in create book`);
     } else {
         // console.info('else');
+        const start = process.hrtime();
         Book.create(book)
             .then(data => {
                 //create book author
@@ -293,7 +322,7 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
                             }
                         });
                 }
-                try {
+                // try {
 
                     // upload1(req, res);
                     // console.log("req.file:" + req.file);
@@ -301,19 +330,19 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
                     // console.log("req.files.bookImages:" + req.files.bookImages);
                     // console.log("req.body.bookImages:" + req.body.bookImages);
                 
-                    if (req.files.length <= 0) {
+                    // if (req.files.length <= 0) {
                     //   return res.send(`You must select at least 1 file.`);
-                    }
+                    // }
                 
                     // return res.send(`Files has been uploaded.`);
-                } catch (error) {
-                    console.log(error);
+                // } catch (error) {
+                //     console.log(error);
                 
-                    if (error.code === "LIMIT_UNEXPECTED_FILE") {
+                //     if (error.code === "LIMIT_UNEXPECTED_FILE") {
                         // return res.send("Too many files to upload.");
-                    }
+                    // }
                     // return res.send(`Error when trying upload many files: ${error}`);
-                }
+                // }
                 // now file upload
                 // for (var i = 0; i < bookImages.length; i++) {
                     // fs.readFile(req.files.bookImage.path, function (err, data) {
@@ -327,8 +356,10 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
                     // });
                 // }
 
-                console.info("data:" + data)
+                // console.info("data:" + data)
                 if(data) {
+                    const durationInMilliseconds = util.getDurationInMilliseconds(start);
+                    client.timing('user_add_book_query', durationInMilliseconds);
                     req.flash(
                         'success_msg',
                         'Book added successfully'
@@ -342,6 +373,7 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
                     );
                     res.redirect('/books');
                     errors = [];
+                    logger.error(`Error in create book`);
                 }
             })
             .catch(err => {
@@ -349,11 +381,13 @@ router.post('/create', ensureAuthenticated, s3utils.upload.array('bookImages[]',
                     'error_msg',
                     'Error occurred in adding book!'
                 );
-                console.info('insert error', err);
+                // console.info('insert error', err);
+                logger.error(`Error in inserting book`, {tags: 'http', additionalInfo: {error: err}});
                 res.redirect('/books');
             });
 
     }
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages[]', 10), function(req, res, next) {
@@ -366,9 +400,9 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
         authors
     } = req.body;
     errors = [];
-    console.info("req.params.id" + req.params.id);
+    // console.info("req.params.id" + req.params.id);
     // Validate request
-    console.info("authors:" + req.body.authors)
+    // console.info("authors:" + req.body.authors)
     if (!req.body.isbn || !req.body.title || !req.body.publicationDate || !req.body.quantity || !req.body.price || !req.body.authors) {
         errors.push({
             msg: 'Fields can not be empty!'
@@ -424,6 +458,7 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
                     }
                 });
             }
+            logger.error(`Field error in update book`);
         });
         // req.flash(
         //     'error_msg',
@@ -433,6 +468,7 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
         // req.session.flash = [];
     } else {
         console.info('else');
+        const start = process.hrtime();
         Book.update(book, {
             where: {id: req.params.id, createdBy: req.user.id}
         })
@@ -458,7 +494,7 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
                 
                 for (var i = 0; i < req.files.length; i++) {
                     // s3path = s3utils.putObject(req.files[i].path);
-                    console.info("S3 path: " + req.files[i]);
+                    // console.info("S3 path: " + req.files[i]);
                     const bookimages = {
                         bookId: req.params.id,
                         imagePath: req.files[i].location,    // full path to the uploaded file
@@ -479,6 +515,8 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
             
                 // console.info("data:" + data)
                 if(data) {
+                    const durationInMilliseconds = util.getDurationInMilliseconds(start);
+                    client.timing('user_update_book_query', durationInMilliseconds);
                     req.flash(
                         'success_msg',
                         'Book updated successfully'
@@ -492,6 +530,7 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
                     );
                     res.redirect('/books/edit/req.params.id');
                     errors = [];
+                    logger.error(`Error in updating book`);
                 }
             })
             .catch(err => {
@@ -499,10 +538,12 @@ router.post('/update/:id', ensureAuthenticated, s3utils.upload.array('bookImages
                     'error_msg',
                     'Error occurred in updating book!'
                 );
-                console.info('update error', err);
+                // console.info('update error', err);
+                logger.error(`Error in updating book`, {tags: 'http', additionalInfo: {error: err}});
                 res.redirect('/books/edit/req.params.id');
             });
     }
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
@@ -513,9 +554,12 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
     })
     .then(book => {
         if(book){
+            const start = process.hrtime();
             book.update({
                 isDeleted: true
             }).then(data => {
+                const durationInMilliseconds = util.getDurationInMilliseconds(start);
+                client.timing('user_delete_book_query', durationInMilliseconds);
                 BookImage.findAll({ where: { bookId: book.id}
                 })
                 .then(bookImages => {
@@ -523,7 +567,7 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
                         console.info("File deleting... " + bookImages[i].imageName);
                         s3utils.deleteS3Object(bookImages[i]);
                     }
-                })
+                })                
                 req.flash(
                     'success_msg',
                     'Book deleted successfully!'
@@ -535,7 +579,8 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
                     'error_msg',
                     'Error occurred in deleting book!'
                 );
-                console.info('delete error', err);
+                // console.info('delete error', err);
+                logger.error(`Error in deleting book`, {tags: 'http', additionalInfo: {error: err}});
                 res.redirect('/books');
             });
         } else {
@@ -544,6 +589,7 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
                 'Invalid book selected!'
             );
             res.redirect('/books');
+            logger.error(`Invalid book selected`);
         }
     })
     .catch(err => {
@@ -552,7 +598,9 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
             'Invalid book selected!'
         );
         res.redirect('/books');
+        logger.error(`Error retrieving book info for delete`, {tags: 'http', additionalInfo: {error: err}});
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/image/:imageFile', ensureAuthenticated, (req, res, next) => {
@@ -614,6 +662,7 @@ router.get('/image/:imageFile', ensureAuthenticated, (req, res, next) => {
         //     return base64
         // }
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/deleteImage/:id', ensureAuthenticated, function(req, res, next) {
@@ -634,11 +683,14 @@ router.get('/deleteImage/:id', ensureAuthenticated, function(req, res, next) {
         })
         .catch(err => {
             res.send('failed');
+            logger.error(`Error deleting book image`, {tags: 'http', additionalInfo: {error: err}});
         });
     })
     .catch(err => {
         res.send('failed');
+        logger.error(`Error retrieving book for delete image`, {tags: 'http', additionalInfo: {error: err}});
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.use(function (err, req, res, next) {

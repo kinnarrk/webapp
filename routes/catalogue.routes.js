@@ -11,12 +11,29 @@ const User = db.users;
 const Op = db.Sequelize.Op;
 const { QueryTypes } = require('sequelize');
 
+var logger = require('../config/winston');
+
+var StatsD = require('node-statsd'),
+      client = new StatsD();
+
+var util = require('../lib/utils');
+router.use((req, res, next) => {
+    const start = process.hrtime()
+    res.on('finish', () => {            
+        const durationInMilliseconds = util.getDurationInMilliseconds(start);
+        client.timing(`${req.originalUrl}`, durationInMilliseconds);
+    })        
+    next()
+})
+
 const {
     ensureAuthenticated
 } = require('../config/auth');
 
 router.get('/', ensureAuthenticated, (req, res) => {
+    client.increment('view_books_catalogue');
     errors = [];
+    const start = process.hrtime();
     db.sequelize.query("SELECT b.id id, b.isbn isbn, b.title title, date_format(b.publicationDate, '%m/%d/%Y') publicationDate, b.quantity quantity, " +
                                     " b.price price, group_concat(a.name) as author, " +
                                     " concat(u.first_name, ' ', u.last_name) as sellerName, b.createdBy as createdBy, ANY_VALUE(bi.imageName) as bookImage, ANY_VALUE(bi.imageType) as imageType, group_concat(DISTINCT(bi.imagePath)) as imagePath " +
@@ -25,9 +42,12 @@ router.get('/', ensureAuthenticated, (req, res) => {
                                     " left join bookImages bi on b.id = bi.bookId " +
                                     " where b.isDeleted = 0 and b.quantity > 0 GROUP BY id ORDER BY b.price ASC, b.quantity DESC", { type: QueryTypes.SELECT })
         .then(function(books){
+            const durationInMilliseconds = util.getDurationInMilliseconds(start);
+            client.timing('user_add_book_query', durationInMilliseconds);
             res.render('catalogue', {books: books});
             req.session.flash = [];
         });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/add', ensureAuthenticated, (req, res, next) => {
@@ -55,6 +75,7 @@ router.get('/add', ensureAuthenticated, (req, res, next) => {
             res.redirect('/books/');
         }
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
@@ -124,9 +145,11 @@ router.get('/edit/:id', ensureAuthenticated, (req, res, next) => {
             'error_msg',
             'Error occurred in getting book details!'
         );
-        console.info('edit error', err);
+        // console.info('edit error', err);
+        logger.error(`Error in catalog update`, {tags: 'http', additionalInfo: {error: err}});
         res.redirect('/books');
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.post('/create', ensureAuthenticated, function(req, res, next) {
@@ -221,6 +244,7 @@ router.post('/create', ensureAuthenticated, function(req, res, next) {
             });
 
     }
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.post('/update/:id', ensureAuthenticated, function(req, res, next) {
@@ -331,6 +355,7 @@ router.post('/update/:id', ensureAuthenticated, function(req, res, next) {
                 res.redirect('/books/edit/req.params.id');
             });
     }
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
@@ -373,6 +398,7 @@ router.get('/delete/:id', ensureAuthenticated, function(req, res, next) {
         );
         res.redirect('/books');
     });
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
 router.use(function (err, req, res, next) {

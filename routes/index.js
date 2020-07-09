@@ -4,6 +4,19 @@ const db = require("../models");
 
 var logger = require('../config/winston');
 
+var StatsD = require('node-statsd'),
+      client = new StatsD();
+
+var util = require('../lib/utils');
+router.use((req, res, next) => {
+    const start = process.hrtime()
+    res.on('finish', () => {            
+        const durationInMilliseconds = bcryptUtil.getDurationInMilliseconds(start);
+        client.timing(`${req.originalUrl}`, durationInMilliseconds);
+    })        
+    next()
+})
+
 const {
   ensureAuthenticated
 } = require('../config/auth');
@@ -26,11 +39,15 @@ router.get('/', ensureAuthenticated, function(req, res, next) {
               {'name':'Franz Kafka', 'createdAt': '2020-01-01 00:00:00', 'updatedAt': '2020-01-01 00:00:00'}
           ];
           db.authors.bulkCreate(authorData, { individualHooks: true });
-          logger.info('Authors injected for the first time');
+          // logger.info('Authors injected for the first time');
+          logger.info("Authors injected for the first time");
       }
   });
   res.render('index', { title: 'Kinnar' });
-  logger.info('Index controller passed');
+  logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
+  // logger.error(`Some testing error`);
+  // var err = new Error('This is an error');
+  // logger.error(`Some testing error`, {tags: 'http', additionalInfo: {error: err}});
 });
 
 module.exports = router;
