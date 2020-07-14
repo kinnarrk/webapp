@@ -52,4 +52,11 @@ router.get('/', ensureAuthenticated, function(req, res, next) {
   // logger.error(`Some testing error`, {tags: 'http', additionalInfo: {error: err}});
 });
 
+router.use(function (err, req, res, next) {
+    if (err) {
+        logger.error("Error occured in index router: ", err);
+        // console.log('Error', err);
+    }
+});
+
 module.exports = router;

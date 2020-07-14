@@ -408,4 +408,11 @@ router.get('/logout', (req, res) => {
     logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
 });
 
+router.use(function (err, req, res, next) {
+    if (err) {
+        logger.error("Error occured in user router: ", err);
+        // console.log('Error', err);
+    }
+});
+
 module.exports = router;
