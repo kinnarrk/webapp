@@ -32,8 +32,10 @@ router.use((req, res, next) => {
     const start = process.hrtime()
     res.on('finish', () => {            
         const durationInMilliseconds = util.getDurationInMilliseconds(start);
-        var metric_name = "url" + req.originalUrl.replace(/[|&;$%@"<>()+,\/]/g, "-");
+        var metric_name = req.originalUrl.replace(/\/\d+/g, "");    //remove query parameter
+        metric_name = "url" + metric_name.replace(/[|&;$%@"<>()+,\/]/g, "-");
         client.timing(metric_name, durationInMilliseconds);
+        // logger.info(`${req.method} ${req.originalUrl} ${metric_name} [FINISHED] ${durationInMilliseconds.toLocaleString()} ms`);
     })        
     next()
 })

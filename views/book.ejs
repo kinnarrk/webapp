@@ -171,26 +171,6 @@
   <!-- Page level custom scripts -->
   <script src="/js/demo/datatables-demo.js"></script>
 
-  <script>
-    $( document ).ready(function() {
-      <% if(typeof books != 'undefined') { %>
-          <% books.forEach((book) => { %>
-            $.ajax({url: "/books/image/<%= book.bookImage %>", success: function(result){
-              var img='';
-              if(result == 'Image not found')
-                img = result;
-              else
-                img = "<img src='"+ result +"'/>"
-                // img = "<img src='data:image/jpeg;base64," + hexToBase64(result) + "'/>"
-              $("#bi__<%= book.id %>").html(img);
-            }});
-          <% }); %>
-      <% } %>
-      function hexToBase64(str) {
-          return btoa(String.fromCharCode.apply(null, str.replace(/\r|\n/g, "").replace(/([\da-fA-F]{2}) ?/g, "0x$1 ").replace(/ +$/, "").split(" ")));
-      }
-    });
-  </script>
 </body>
 
 </html>
