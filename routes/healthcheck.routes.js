@@ -21,7 +21,7 @@ router.use((req, res, next) => {
         var metric_name = req.originalUrl.replace(/\/\d+/g, "");    //remove query parameter
         metric_name = "url" + metric_name.replace(/[|&;$%@"<>()+,\/]/g, "-");
         client.timing(metric_name, durationInMilliseconds);
-        logger.info(`${req.method} ${req.originalUrl} ${metric_name} [FINISHED] ${durationInMilliseconds.toLocaleString()} ms`);
+        // logger.info(`${req.method} ${req.originalUrl} ${metric_name} [FINISHED] ${durationInMilliseconds.toLocaleString()} ms`);
     })
     next()
 })
