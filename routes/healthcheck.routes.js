@@ -13,18 +13,18 @@ var logger = require('../config/winston');
 var StatsD = require('node-statsd'),
       client = new StatsD();
 
-
-router.use((req, res, next) => {
-    const start = process.hrtime()
-    res.on('finish', () => {            
-        const durationInMilliseconds = util.getDurationInMilliseconds(start);
-        var metric_name = req.originalUrl.replace(/\/\d+/g, "");    //remove query parameter
-        metric_name = "url" + metric_name.replace(/[|&;$%@"<>()+,\/]/g, "-");
-        client.timing(metric_name, durationInMilliseconds);
+// Use this just for testing. We don't want to create additional load by additing metrics or logs
+// router.use((req, res, next) => {
+    // const start = process.hrtime()
+    // res.on('finish', () => {            
+        // const durationInMilliseconds = util.getDurationInMilliseconds(start);
+        // var metric_name = req.originalUrl.replace(/\/\d+/g, "");    //remove query parameter
+        // metric_name = "url" + metric_name.replace(/[|&;$%@"<>()+,\/]/g, "-");
+        // client.timing(metric_name, durationInMilliseconds);
         // logger.info(`${req.method} ${req.originalUrl} ${metric_name} [FINISHED] ${durationInMilliseconds.toLocaleString()} ms`);
-    })
-    next()
-})
+    // })
+    // next()
+// })
 
 router.get('/', (req, res) => {
     // res.setHeader('Content-Type', 'application/json');
