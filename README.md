@@ -3,12 +3,15 @@
 This app is for practicing Git workflow and CI/CD
 
 Technology stack:
-- Node.js
+- Node.js (v12.x)
 - Express.js
 - MySQL with Sequelize ORM
 - Ejs (Templating engine - UI)
 - Jest (Testing framework)
 - Circle CI for CI/CD Pipeline
+- Winston (Logging)
+- Node-statsd (Statsd client)
+- JMeter (Load testing)
 
 ## Installing node.js and npm
 
@@ -19,11 +22,11 @@ https://github.com/nodesource/distributions/blob/master/README.md#installation-i
 #### Node.js v12.x:
 ```$xslt
 # Using Ubuntu
-curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # Using Debian, as root
-curl -sL https://deb.nodesource.com/setup_13.x | bash -
+curl -sL https://deb.nodesource.com/setup_12.x | bash -
 apt-get install -y nodejs
 ```
 ***Optional***: install build tools
