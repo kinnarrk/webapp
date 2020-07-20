@@ -396,6 +396,14 @@ router.post('/changePassword', ensureAuthenticated, (req, res) => {
     logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {headers: req.headers }});
 });
 
+router.get('/forgotpassword', (req, res) => {
+    errors = [];
+    res.render('forgotpassword');
+    req.session.flash = [];
+    // logger.info('User route login get');
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
+});
+
 // router.post("/", users.create);
 
 // Retrieve single user
