@@ -418,7 +418,15 @@ router.post('/forgotpassword', (req, res) => {
             );
             errors = [];
             res.redirect('/users/login');
+        } else {
+            req.flash(
+                'error_msg',
+                'User with provided email id doesn\'t exists!'
+            );
+            errors = [];
+            res.redirect('/users/login');
         }
+    });
     // logger.info('User route login get');
     logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {headers: req.headers }});
 });
