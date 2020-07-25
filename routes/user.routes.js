@@ -9,6 +9,7 @@ const User = db.users;
 const Op = db.Sequelize.Op;
 
 var bcryptUtil = require('../lib/utils');
+var snsUtil = require('../lib/snsUtil');
 
 const emailValidator = require("email-validator");
 const passwordValidator = require('password-validator');
@@ -402,6 +403,24 @@ router.get('/forgotpassword', (req, res) => {
     req.session.flash = [];
     // logger.info('User route login get');
     logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
+});
+
+router.post('/forgotpassword', (req, res) => {
+    User.findOne({
+        where: { email: req.body.email }
+    }).then(user => {
+        // console.info('user find');
+        if (user) {
+            const durationInMilliseconds = snsUtil.sendSNSEmailNotification(req.body.email)
+            req.flash(
+                'success_msg',
+                'Instructions to reset password sent on your email id'
+            );
+            errors = [];
+            res.redirect('/users/login');
+        }
+    // logger.info('User route login get');
+    logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {headers: req.headers }});
 });
 
 // router.post("/", users.create);
