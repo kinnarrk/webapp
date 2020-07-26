@@ -17,7 +17,9 @@ router.use((req, res, next) => {
         client.timing(metric_name, durationInMilliseconds);
     })        
     next()
-})
+});
+
+var sslCheckUtil = require('../lib/sslCheckUtil');
 
 const {
   ensureAuthenticated
@@ -50,6 +52,9 @@ router.get('/', ensureAuthenticated, function(req, res, next) {
   // logger.error(`Some testing error`);
   // var err = new Error('This is an error');
   // logger.error(`Some testing error`, {tags: 'http', additionalInfo: {error: err}});
+
+  // Check if db connection uses SSL
+  sslCheckUtil.rdsSSLCheck();
 });
 
 router.use(function (err, req, res, next) {

@@ -37,10 +37,9 @@ module.exports = {
             min: 0,
             acquire: 30000,
             idle: 10000
+        },
+        dialectOptions: {
+            ssl: true
         }
-        // ,
-        // dialectOptions: {
-        //     ssl: true
-        // }
     }
 };

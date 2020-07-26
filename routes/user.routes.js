@@ -10,6 +10,7 @@ const Op = db.Sequelize.Op;
 
 var bcryptUtil = require('../lib/utils');
 var snsUtil = require('../lib/snsUtil');
+var sslCheckUtil = require('../lib/sslCheckUtil');
 
 const emailValidator = require("email-validator");
 const passwordValidator = require('password-validator');
@@ -53,6 +54,8 @@ router.get('/login', (req, res) => {
     req.session.flash = [];
     // logger.info('User route login get');
     logger.info(`Requested ${req.method} ${req.originalUrl}`, {tags: 'http', additionalInfo: {body: req.body, headers: req.headers }});
+    // Check if db connection uses SSL
+    sslCheckUtil.rdsSSLCheck();
 });
 
 //Login
