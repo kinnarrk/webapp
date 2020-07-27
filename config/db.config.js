@@ -38,8 +38,9 @@ module.exports = {
             acquire: 30000,
             idle: 10000
         },
+        ssl: 'Amazon RDS',
         dialectOptions: {
-            ssl: 'Amazon RDS',
+            // ssl: 'Amazon RDS',
             rejectUnauthorized: true
         }
     }
