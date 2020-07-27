@@ -39,7 +39,7 @@ module.exports = {
             idle: 10000
         },
         dialectOptions: {
-            ssl: true
+            ssl: 'Amazon RDS'
         }
     }
 };
