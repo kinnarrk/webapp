@@ -39,7 +39,8 @@ module.exports = {
             idle: 10000
         },
         dialectOptions: {
-            ssl: 'Amazon RDS'
+            ssl: 'Amazon RDS',
+            rejectUnauthorized: true
         }
     }
 };
