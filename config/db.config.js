@@ -46,7 +46,8 @@ module.exports = {
         },
         // ssl: 'Amazon RDS',
         dialectOptions: {
-            ssl: 'Amazon RDS'
+            ssl: 'Amazon RDS',
+            rejectUnauthorized: true
         }
     }
 };
