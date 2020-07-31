@@ -13,7 +13,8 @@ module.exports = {
             idle: 10000
         },
         dialectOptions: {
-            ssl: false
+            ssl: false,
+            rejectUnauthorized: false
         }
     },
     "test": {
@@ -29,7 +30,8 @@ module.exports = {
             idle: 10000
         },
         dialectOptions: {
-            ssl: false
+            ssl: false,
+            rejectUnauthorized: false
         }
     },
     "production": {
